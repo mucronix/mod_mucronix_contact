@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form>
+	<fieldset name="contact">
+		<field
+			name="name"
+			type="text"
+			label="MOD_MUCRONIX_CONTACT_FORM_NAME_LABEL"
+			maxlength="100"
+			filter="string"
+			autocomplete="name"
+			required="true"
+		/>
+
+		<field
+			name="email"
+			type="email"
+			label="MOD_MUCRONIX_CONTACT_FORM_EMAIL_LABEL"
+			filter="string"
+			validate="email"
+			autocomplete="email"
+			required="true"
+		/>
+
+		<field
+			name="message"
+			type="textarea"
+			label="MOD_MUCRONIX_CONTACT_FORM_MESSAGE_LABEL"
+			rows="6"
+			maxlength="5000"
+			filter="string"
+			required="true"
+		/>
+
+		<field
+			name="attachment"
+			type="file"
+			label="MOD_MUCRONIX_CONTACT_FORM_ATTACHMENT_LABEL"
+			description="MOD_MUCRONIX_CONTACT_FORM_ATTACHMENT_DESC"
+		/>
+
+		<field
+			name="consent"
+			type="checkbox"
+			label="MOD_MUCRONIX_CONTACT_FORM_CONSENT_LABEL"
+			value="1"
+			filter="integer"
+			required="true"
+		/>
+
+		<field
+			name="captcha"
+			type="captcha"
+			label="MOD_MUCRONIX_CONTACT_FORM_CAPTCHA_LABEL"
+			validate="captcha"
+		/>
+
+		<field
+			name="mcx_hp"
+			type="text"
+			label="MOD_MUCRONIX_CONTACT_FORM_HONEYPOT_LABEL"
+			filter="string"
+			autocomplete="off"
+		/>
+	</fieldset>
+</form>

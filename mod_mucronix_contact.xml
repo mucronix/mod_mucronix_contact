@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension type="module" client="site" method="upgrade">
+	<name>mod_mucronix_contact</name>
+	<author>Mucronix</author>
+	<creationDate>2026-09</creationDate>
+	<copyright>(C) 2026 Mucronix</copyright>
+	<license>GNU General Public License version 2 or later; see LICENSE</license>
+	<authorEmail>support@mucronix.com</authorEmail>
+	<authorUrl>https://mucronix.com</authorUrl>
+	<version>1.0.0</version>
+	<description>MOD_MUCRONIX_CONTACT_XML_DESCRIPTION</description>
+	<scriptfile>script.php</scriptfile>
+	<namespace path="src">Mucronix\Module\MucronixContact</namespace>
+	<files>
+		<folder module="mod_mucronix_contact">services</folder>
+		<folder>forms</folder>
+		<folder>layouts</folder>
+		<folder>src</folder>
+		<folder>tmpl</folder>
+	</files>
+	<media destination="mod_mucronix_contact" folder="media">
+		<filename>joomla.asset.json</filename>
+		<folder>js</folder>
+	</media>
+	<languages>
+		<language tag="en-GB">language/en-GB/mod_mucronix_contact.ini</language>
+		<language tag="en-GB">language/en-GB/mod_mucronix_contact.sys.ini</language>
+	</languages>
+	<config>
+		<fields name="params">
+			<fieldset name="basic">
+				<field
+					name="recipient"
+					type="text"
+					label="MOD_MUCRONIX_CONTACT_FIELD_RECIPIENT_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_RECIPIENT_DESC"
+					filter="string"
+				/>
+
+				<field
+					name="recipient_extra"
+					type="textarea"
+					label="MOD_MUCRONIX_CONTACT_FIELD_RECIPIENT_EXTRA_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_RECIPIENT_EXTRA_DESC"
+					rows="3"
+					filter="string"
+				/>
+
+				<field
+					name="subject"
+					type="text"
+					label="MOD_MUCRONIX_CONTACT_FIELD_SUBJECT_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_SUBJECT_DESC"
+					filter="string"
+				/>
+
+				<field
+					name="form_intro"
+					type="editor"
+					label="MOD_MUCRONIX_CONTACT_FIELD_FORM_INTRO_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_FORM_INTRO_DESC"
+					filter="\Joomla\CMS\Component\ComponentHelper::filterText"
+					buttons="true"
+					hide="readmore,pagebreak,module,fields"
+				/>
+
+				<field
+					name="submit_text"
+					type="text"
+					label="MOD_MUCRONIX_CONTACT_FIELD_SUBMIT_TEXT_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_SUBMIT_TEXT_DESC"
+					filter="string"
+				/>
+
+				<field
+					name="captcha"
+					type="plugins"
+					folder="captcha"
+					label="MOD_MUCRONIX_CONTACT_FIELD_CAPTCHA_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_CAPTCHA_DESC"
+					filter="cmd"
+					useglobal="true"
+					>
+					<option value="0">JOPTION_DO_NOT_USE</option>
+				</field>
+
+				<field
+					name="success_text"
+					type="editor"
+					label="MOD_MUCRONIX_CONTACT_FIELD_SUCCESS_TEXT_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_SUCCESS_TEXT_DESC"
+					filter="\Joomla\CMS\Component\ComponentHelper::filterText"
+					buttons="true"
+					hide="readmore,pagebreak,module,fields"
+				/>
+
+				<!-- A menu item id, not an address: a renamed alias would take a typed
+				     address down with it silently, while the sending kept working.
+
+				     published="1" leaves out what is not published, which the field does
+				     not do on its own: MenusHelper::getMenuLinks() drops only the trash.
+
+				     disable holds the five system link types, the same list com_menus calls
+				     $specialTypes. They are stored with component_id = 0, so the router has
+				     no component to build a path with and hands back the site root. It is
+				     what com_modules does on its own menu item field, and it only greys the
+				     options out - a value saved earlier still needs the check in the helper. -->
+				<field
+					name="success_page"
+					type="menuitem"
+					label="MOD_MUCRONIX_CONTACT_FIELD_SUCCESS_PAGE_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_SUCCESS_PAGE_DESC"
+					published="1"
+					disable="separator,heading,container,url,alias"
+					filter="integer"
+					>
+					<option value="0">MOD_MUCRONIX_CONTACT_FIELD_SUCCESS_PAGE_NONE</option>
+				</field>
+			</fieldset>
+
+			<fieldset name="formfields" label="MOD_MUCRONIX_CONTACT_FIELDSET_FORMFIELDS_LABEL" addfieldprefix="Joomla\Component\Content\Administrator\Field">
+				<field
+					name="show_name"
+					type="radio"
+					layout="joomla.form.field.radio.switcher"
+					label="MOD_MUCRONIX_CONTACT_FIELD_SHOW_NAME_LABEL"
+					default="1"
+					filter="integer"
+					>
+					<option value="0">JHIDE</option>
+					<option value="1">JSHOW</option>
+				</field>
+
+				<field
+					name="require_name"
+					type="radio"
+					layout="joomla.form.field.radio.switcher"
+					label="MOD_MUCRONIX_CONTACT_FIELD_REQUIRE_NAME_LABEL"
+					default="1"
+					filter="integer"
+					showon="show_name:1"
+					>
+					<option value="0">JNO</option>
+					<option value="1">JYES</option>
+				</field>
+
+				<field
+					name="show_email"
+					type="radio"
+					layout="joomla.form.field.radio.switcher"
+					label="MOD_MUCRONIX_CONTACT_FIELD_SHOW_EMAIL_LABEL"
+					default="1"
+					filter="integer"
+					>
+					<option value="0">JHIDE</option>
+					<option value="1">JSHOW</option>
+				</field>
+
+				<field
+					name="require_email"
+					type="radio"
+					layout="joomla.form.field.radio.switcher"
+					label="MOD_MUCRONIX_CONTACT_FIELD_REQUIRE_EMAIL_LABEL"
+					default="1"
+					filter="integer"
+					showon="show_email:1"
+					>
+					<option value="0">JNO</option>
+					<option value="1">JYES</option>
+				</field>
+
+				<field
+					name="show_message"
+					type="radio"
+					layout="joomla.form.field.radio.switcher"
+					label="MOD_MUCRONIX_CONTACT_FIELD_SHOW_MESSAGE_LABEL"
+					default="1"
+					filter="integer"
+					>
+					<option value="0">JHIDE</option>
+					<option value="1">JSHOW</option>
+				</field>
+
+				<field
+					name="require_message"
+					type="radio"
+					layout="joomla.form.field.radio.switcher"
+					label="MOD_MUCRONIX_CONTACT_FIELD_REQUIRE_MESSAGE_LABEL"
+					default="1"
+					filter="integer"
+					showon="show_message:1"
+					>
+					<option value="0">JNO</option>
+					<option value="1">JYES</option>
+				</field>
+
+				<field
+					name="show_consent"
+					type="radio"
+					layout="joomla.form.field.radio.switcher"
+					label="MOD_MUCRONIX_CONTACT_FIELD_SHOW_CONSENT_LABEL"
+					default="1"
+					filter="integer"
+					>
+					<option value="0">JHIDE</option>
+					<option value="1">JSHOW</option>
+				</field>
+
+				<field
+					name="consent_article"
+					type="modal_article"
+					label="MOD_MUCRONIX_CONTACT_FIELD_CONSENT_ARTICLE_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_CONSENT_ARTICLE_DESC"
+					select="true"
+					new="true"
+					edit="true"
+					clear="true"
+					filter="integer"
+					showon="show_consent:1"
+				/>
+
+				<field
+					name="consent_text"
+					type="text"
+					label="MOD_MUCRONIX_CONTACT_FIELD_CONSENT_TEXT_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_CONSENT_TEXT_DESC"
+					filter="string"
+					showon="show_consent:1"
+				/>
+
+				<field
+					name="show_attachment"
+					type="radio"
+					layout="joomla.form.field.radio.switcher"
+					label="MOD_MUCRONIX_CONTACT_FIELD_SHOW_ATTACHMENT_LABEL"
+					default="0"
+					filter="integer"
+					>
+					<option value="0">JHIDE</option>
+					<option value="1">JSHOW</option>
+				</field>
+
+				<field
+					name="attachment_types"
+					type="text"
+					label="MOD_MUCRONIX_CONTACT_FIELD_ATTACHMENT_TYPES_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_ATTACHMENT_TYPES_DESC"
+					default="jpg,jpeg,png,gif,pdf,txt,zip"
+					filter="string"
+					showon="show_attachment:1"
+				/>
+
+				<field
+					name="attachment_maxsize"
+					type="number"
+					label="MOD_MUCRONIX_CONTACT_FIELD_ATTACHMENT_MAXSIZE_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_ATTACHMENT_MAXSIZE_DESC"
+					default="2"
+					min="1"
+					filter="integer"
+					showon="show_attachment:1"
+				/>
+			</fieldset>
+
+			<fieldset name="telegram" label="MOD_MUCRONIX_CONTACT_FIELDSET_TELEGRAM_LABEL">
+				<field
+					name="telegram_enabled"
+					type="radio"
+					layout="joomla.form.field.radio.switcher"
+					label="MOD_MUCRONIX_CONTACT_FIELD_TELEGRAM_ENABLED_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_TELEGRAM_ENABLED_DESC"
+					default="0"
+					filter="integer"
+				>
+					<option value="0">JNO</option>
+					<option value="1">JYES</option>
+				</field>
+
+				<field
+					name="telegram_token"
+					type="password"
+					label="MOD_MUCRONIX_CONTACT_FIELD_TELEGRAM_TOKEN_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_TELEGRAM_TOKEN_DESC"
+					filter="raw"
+					autocomplete="off"
+					showon="telegram_enabled:1"
+				/>
+
+				<field
+					name="telegram_chat_id"
+					type="text"
+					label="MOD_MUCRONIX_CONTACT_FIELD_TELEGRAM_CHAT_ID_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_TELEGRAM_CHAT_ID_DESC"
+					filter="string"
+					showon="telegram_enabled:1"
+				/>
+
+				<field
+					name="telegram_attach"
+					type="radio"
+					layout="joomla.form.field.radio.switcher"
+					label="MOD_MUCRONIX_CONTACT_FIELD_TELEGRAM_ATTACH_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_TELEGRAM_ATTACH_DESC"
+					default="0"
+					filter="integer"
+					showon="telegram_enabled:1[AND]show_attachment:1"
+				>
+					<option value="0">JNO</option>
+					<option value="1">JYES</option>
+				</field>
+			</fieldset>
+
+			<fieldset name="extrafields" label="MOD_MUCRONIX_CONTACT_FIELDSET_EXTRAFIELDS_LABEL">
+				<field
+					name="extra_fields"
+					type="textarea"
+					label="MOD_MUCRONIX_CONTACT_FIELD_EXTRA_FIELDS_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_EXTRA_FIELDS_DESC"
+					rows="10"
+					filter="raw"
+				/>
+			</fieldset>
+
+			<fieldset name="appearance" label="MOD_MUCRONIX_CONTACT_FIELDSET_APPEARANCE_LABEL">
+				<field
+					name="wrapper_class"
+					type="text"
+					label="MOD_MUCRONIX_CONTACT_FIELD_WRAPPER_CLASS_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_WRAPPER_CLASS_DESC"
+					validate="CssIdentifier"
+				/>
+
+				<field
+					name="form_class"
+					type="text"
+					label="MOD_MUCRONIX_CONTACT_FIELD_FORM_CLASS_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_FORM_CLASS_DESC"
+					validate="CssIdentifier"
+				/>
+
+				<field
+					name="submit_class"
+					type="text"
+					label="MOD_MUCRONIX_CONTACT_FIELD_SUBMIT_CLASS_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_SUBMIT_CLASS_DESC"
+					validate="CssIdentifier"
+				/>
+			</fieldset>
+
+			<fieldset name="advanced">
+				<field
+					name="log_sent"
+					type="radio"
+					layout="joomla.form.field.radio.switcher"
+					label="MOD_MUCRONIX_CONTACT_FIELD_LOG_SENT_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_LOG_SENT_DESC"
+					default="0"
+					filter="integer"
+					>
+					<option value="0">JNO</option>
+					<option value="1">JYES</option>
+				</field>
+
+				<field
+					name="layout"
+					type="modulelayout"
+					label="JFIELD_ALT_LAYOUT_LABEL"
+					class="form-select"
+					validate="moduleLayout"
+				/>
+
+				<field
+					name="moduleclass_sfx"
+					type="textarea"
+					label="COM_MODULES_FIELD_MODULECLASS_SFX_LABEL"
+					rows="3"
+					validate="CssIdentifier"
+				/>
+			</fieldset>
+		</fields>
+	</config>
+</extension>
