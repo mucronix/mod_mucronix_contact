@@ -15,6 +15,11 @@
       "attributes": {
         "defer": true
       }
+    },
+    {
+      "name": "mod_mucronix_contact.form",
+      "type": "style",
+      "uri": "mod_mucronix_contact/form.css"
     }
   ]
 }

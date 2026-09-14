@@ -46,6 +46,16 @@ $wa = Factory::getApplication()->getDocument()->getWebAssetManager();
 $wa->getRegistry()->addExtensionRegistryFile('mod_mucronix_contact');
 $wa->useScript('mod_mucronix_contact.form');
 
+/*
+ * The stylesheet only tidies the inside of the form and can be switched off whole, for a template
+ * that dresses its forms itself. The uri in joomla.asset.json carries no css segment, the same way
+ * the script carries no js one: with it Joomla looks for media/mod_mucronix_contact/css/css/form.css,
+ * finds nothing and drops the asset without a word - no error, no tag on the page.
+ */
+if ($params->get('load_css', 1)) {
+    $wa->useStyle('mod_mucronix_contact.form');
+}
+
 Text::script('MOD_MUCRONIX_CONTACT_FORM_SENDING');
 Text::script('MOD_MUCRONIX_CONTACT_ERROR_SEND');
 

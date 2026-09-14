@@ -20,6 +20,7 @@
 	</files>
 	<media destination="mod_mucronix_contact" folder="media">
 		<filename>joomla.asset.json</filename>
+		<folder>css</folder>
 		<folder>js</folder>
 	</media>
 	<languages>
@@ -322,6 +323,19 @@
 			</fieldset>
 
 			<fieldset name="appearance" label="MOD_MUCRONIX_CONTACT_FIELDSET_APPEARANCE_LABEL">
+				<field
+					name="load_css"
+					type="radio"
+					layout="joomla.form.field.radio.switcher"
+					label="MOD_MUCRONIX_CONTACT_FIELD_LOAD_CSS_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_LOAD_CSS_DESC"
+					default="1"
+					filter="integer"
+					>
+					<option value="0">JNO</option>
+					<option value="1">JYES</option>
+				</field>
+
 				<field
 					name="wrapper_class"
 					type="text"

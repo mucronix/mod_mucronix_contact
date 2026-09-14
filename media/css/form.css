@@ -1,0 +1,203 @@
+/**
+ * @package     mod_mucronix_contact
+ *
+ * @copyright   (C) 2026 Mucronix
+ * @license     GNU General Public License version 2 or later; see LICENSE
+ */
+
+/*
+ * Every selector sits inside .mcx, so no other form on the site is touched, and nothing here uses
+ * !important: a template that wants its own look has to be able to win without a fight.
+ *
+ * What this file does not do: card, background, border and shadow around the form. Those come from
+ * the template, through the Wrapper Class parameter. Fonts and text sizes are the template's too.
+ * Colours and the corner radius are variables, so one line in the site CSS changes them all.
+ */
+
+.mcx {
+    --mcx-accent: #2f6fbf;
+    --mcx-ok: #27884a;
+    --mcx-ok-bg: #eaf6ee;
+    --mcx-error: #c0392b;
+    --mcx-error-bg: #fdecea;
+    --mcx-notice: #b8860b;
+    --mcx-notice-bg: #fff8e5;
+    --mcx-border: #ddd;
+    --mcx-radius: 4px;
+}
+
+/*
+ * The honeypot is already hidden by the hidden attribute in the markup. This is the second lock:
+ * shown by accident it would be filled in by real people, and their messages would be dropped
+ * without a word to anyone.
+ */
+.mcx .mcx-hp {
+    display: none;
+}
+
+.mcx .mcx-intro {
+    margin-bottom: 16px;
+}
+
+/*
+ * The rhythm lives on the wrapper, which holds a field and the message belonging to it together.
+ * The field itself is flattened, or the message would drift towards the field below it.
+ */
+.mcx .mcx-field-wrap {
+    margin-bottom: 16px;
+}
+
+.mcx .mcx-field {
+    margin-bottom: 0;
+}
+
+/* The label is two levels down: renderfield builds .control-group > .control-label > label */
+.mcx .mcx-field .control-label {
+    display: block;
+    margin-bottom: 4px;
+}
+
+/*
+ * Direct children of .controls, where the core layout puts the input. A descendant selector reached
+ * too far: a calendar field builds .field-calendar > .input-group > input + button, and stretching
+ * that inner input to the full width pushes its button out of the row. The group is stretched
+ * instead and shares the room out itself. Checkboxes and radios keep their own size throughout,
+ * in the base fields and in the extra fields alike.
+ */
+.mcx .mcx-field .controls > input:not([type="checkbox"]):not([type="radio"]),
+.mcx .mcx-field .controls > select,
+.mcx .mcx-field .controls > textarea,
+.mcx .mcx-field .controls > .field-calendar,
+.mcx .mcx-field .controls > .input-group {
+    box-sizing: border-box;
+    max-width: 100%;
+    width: 100%;
+}
+
+.mcx .mcx-field textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.mcx .mcx-field .form-text {
+    display: block;
+    margin-top: 4px;
+}
+
+/*
+ * The consent line has to read as one sentence, box first and wording after it. The core layout
+ * prints the label before the input, so the order is turned round here rather than in the markup:
+ * the markup is the core layout and stays the core layout.
+ *
+ * Every size here is pinned rather than left to work itself out. The first attempt relied on a flex
+ * item shrinking to its content and it came out stacked on Cassiopeia, because the checkbox does not
+ * sit in .controls directly: the core checkbox layout wraps it in .form-check, a box built for the
+ * opposite arrangement - wording inside it, to the right of an input floated into a reserved strip
+ * of left padding. Undo that strip and the float, and pin the two columns, and there is nothing
+ * left to guess at.
+ */
+.mcx .mcx-consent {
+    align-items: flex-start;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+}
+
+.mcx .mcx-consent .controls {
+    flex: 0 0 auto;
+    min-width: 0;
+    order: 1;
+    width: auto;
+}
+
+.mcx .mcx-consent .control-label {
+    flex: 1 1 auto;
+    margin-bottom: 0;
+    min-width: 0;
+    order: 2;
+}
+
+.mcx .mcx-consent .form-check {
+    display: block;
+    margin: 0;
+    min-height: 0;
+    padding-left: 0;
+}
+
+.mcx .mcx-consent .form-check-input {
+    float: none;
+    margin: 0;
+}
+
+/*
+ * Larger than standard, to be hit with a finger.
+ *
+ * The colour is a second choice, not the first: accent-color paints a checkbox the browser still
+ * draws itself, and a template that has taken that over with appearance: none - Bootstrap does,
+ * Cassiopeia among them - keeps its own look, which is the right outcome. Drawing our own box
+ * instead would mean a hand-made tick and a control that vanishes in forced-colours mode.
+ */
+.mcx .mcx-consent input[type="checkbox"] {
+    accent-color: var(--mcx-accent);
+    height: 20px;
+    width: 20px;
+}
+
+.mcx .mcx-consent input[type="checkbox"]:hover {
+    box-shadow: 0 0 4px var(--mcx-accent);
+}
+
+.mcx .mcx-field.is-invalid input,
+.mcx .mcx-field.is-invalid select,
+.mcx .mcx-field.is-invalid textarea {
+    border-color: var(--mcx-error);
+}
+
+.mcx .mcx-error {
+    color: var(--mcx-error);
+    display: block;
+    margin-top: 4px;
+}
+
+/* A warning, not a refusal, so it stays neutral. Only ever seen with JavaScript switched off. */
+.mcx .mcx-noscript {
+    display: block;
+    margin-top: 4px;
+    opacity: 0.75;
+}
+
+/*
+ * The block is in the page from the start, empty, waiting for aria-live to announce whatever lands
+ * in it. So the box is drawn by the modifiers, which appear only when there is something to say:
+ * :empty would not serve here, the markup leaves a line break inside.
+ */
+.mcx .mcx-message--ok,
+.mcx .mcx-message--error {
+    border-radius: var(--mcx-radius);
+    margin: 16px 0;
+    padding: 14px 18px;
+}
+
+.mcx .mcx-message--ok {
+    background: var(--mcx-ok-bg);
+    border-left: 4px solid var(--mcx-ok);
+}
+
+.mcx .mcx-message--error {
+    background: var(--mcx-error-bg);
+    border-left: 4px solid var(--mcx-error);
+}
+
+/* Seen by the site owner alone. Meant to be noticed, not to alarm: nothing here is on fire. */
+.mcx .mcx-admin-warning {
+    background: var(--mcx-notice-bg);
+    border-left: 4px solid var(--mcx-notice);
+    border-radius: var(--mcx-radius);
+    margin-bottom: 16px;
+    padding: 12px 16px;
+}
+
+.mcx .mcx-submit[disabled] {
+    cursor: default;
+    opacity: 0.6;
+}
