@@ -86,6 +86,7 @@ $files = [
     'layouts/mucronix/form/field/file.php',
     'src/Dispatcher/Dispatcher.php',
     'src/Helper/MailSender.php',
+    'src/Helper/MessageFields.php',
     'src/Helper/MucronixContactHelper.php',
     'src/Helper/TelegramSender.php',
     'tmpl/default.php',

@@ -31,14 +31,6 @@ use Joomla\Registry\Registry;
 class MailSender
 {
     /**
-     * Fields that never belong in the message.
-     *
-     * @var    string[]
-     * @since  1.0.0
-     */
-    private const SKIP_FIELDS = ['captcha', 'mcx_hp'];
-
-    /**
      * Sends the message to the recipients of a module instance.
      *
      * @param   Form                     $form        The contact form, used for the field labels.
@@ -144,29 +136,7 @@ class MailSender
      */
     private function getBody(Form $form, array $data, \stdClass $module, string $pageUrl, ?array $attachment = null): string
     {
-        $fields = [];
-
-        foreach ($form->getFieldset('contact') as $field) {
-            if (\in_array($field->fieldname, self::SKIP_FIELDS, true)) {
-                continue;
-            }
-
-            $value = $data[$field->fieldname] ?? '';
-
-            if ($field->fieldname === 'consent') {
-                $value = $value ? Text::_('JYES') : Text::_('JNO');
-            }
-
-            if (trim((string) $value) === '') {
-                continue;
-            }
-
-            // The consent label can carry a link to the policy article, the message needs the text only
-            $fields[] = [
-                'label' => trim(strip_tags($field->title)),
-                'value' => (string) $value,
-            ];
-        }
+        $fields = MessageFields::collect($form, $data);
 
         /*
          * The name is written into the body as well: a mail client or a virus scanner may drop the

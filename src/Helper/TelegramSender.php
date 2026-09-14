@@ -30,15 +30,6 @@ use Joomla\Registry\Registry;
 class TelegramSender
 {
     /**
-     * Fields that never belong in the message. The same two the mail leaves out: one is a check,
-     * the other a trap, and neither is anything the visitor wrote.
-     *
-     * @var    string[]
-     * @since  1.0.0
-     */
-    private const SKIP_FIELDS = ['captcha', 'mcx_hp'];
-
-    /**
      * Seconds the whole request may take. The visitor is waiting behind it and the mail has already gone.
      *
      * @var    integer
@@ -134,23 +125,8 @@ class TelegramSender
     {
         $lines = [];
 
-        foreach ($form->getFieldset('contact') as $field) {
-            if (\in_array($field->fieldname, self::SKIP_FIELDS, true)) {
-                continue;
-            }
-
-            $value = $data[$field->fieldname] ?? '';
-
-            if ($field->fieldname === 'consent') {
-                $value = $value ? Text::_('JYES') : Text::_('JNO');
-            }
-
-            if (trim((string) $value) === '') {
-                continue;
-            }
-
-            // The consent label can carry a link to the policy article, the text alone belongs here
-            $lines[] = trim(strip_tags($field->title)) . ': ' . $value;
+        foreach (MessageFields::collect($form, $data) as $field) {
+            $lines[] = $field['label'] . ': ' . $field['value'];
         }
 
         /*
