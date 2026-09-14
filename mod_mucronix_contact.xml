@@ -26,6 +26,10 @@
 	<languages>
 		<language tag="en-GB">language/en-GB/mod_mucronix_contact.ini</language>
 		<language tag="en-GB">language/en-GB/mod_mucronix_contact.sys.ini</language>
+		<language tag="ru-RU">language/ru-RU/mod_mucronix_contact.ini</language>
+		<language tag="ru-RU">language/ru-RU/mod_mucronix_contact.sys.ini</language>
+		<language tag="uk-UA">language/uk-UA/mod_mucronix_contact.ini</language>
+		<language tag="uk-UA">language/uk-UA/mod_mucronix_contact.sys.ini</language>
 	</languages>
 	<config>
 		<fields name="params">
