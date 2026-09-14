@@ -31,6 +31,9 @@
 		<language tag="uk-UA">language/uk-UA/mod_mucronix_contact.ini</language>
 		<language tag="uk-UA">language/uk-UA/mod_mucronix_contact.sys.ini</language>
 	</languages>
+	<updateservers>
+		<server type="extension" priority="1" name="Mucronix Contact">https://mucronix.com/updates/mod_mucronix_contact.xml</server>
+	</updateservers>
 	<config>
 		<fields name="params">
 			<fieldset name="basic">
