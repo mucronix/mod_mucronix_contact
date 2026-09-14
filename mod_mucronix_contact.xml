@@ -12,6 +12,12 @@
 	<scriptfile>script.php</scriptfile>
 	<namespace path="src">Mucronix\Module\MucronixContact</namespace>
 	<files>
+		<!-- The licence is required by the GPL and by the extensions directory; the README is here
+		     because the site owner installs a ZIP from the administrator and never opens GitHub,
+		     and the one thing that regularly needs reading is the Telegram setup. Joomla itself
+		     ships no README inside an extension; this is a deliberate departure. -->
+		<filename>LICENSE</filename>
+		<filename>README.md</filename>
 		<folder module="mod_mucronix_contact">services</folder>
 		<folder>forms</folder>
 		<folder>layouts</folder>

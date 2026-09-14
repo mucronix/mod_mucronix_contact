@@ -10,8 +10,10 @@
 /**
  * Builds the installable package.
  *
- * The manifest has to sit in the root of the archive, and nothing belonging to the repository or
- * to testing goes in: tests/, build/, update/, this script and the markdown files stay behind.
+ * The manifest has to sit in the root of the archive, and nothing belonging to the repository or to
+ * testing goes in: tests/, build/, update/, this script, the spec and ENV.md stay behind. LICENSE
+ * and README.md do ship - the licence because the GPL and the extensions directory ask for it, the
+ * README because the site owner installs from the administrator and never opens the repository.
  *
  * Usage:
  *   php build.php [target.zip]
@@ -76,6 +78,8 @@ function checkVersions(string $root): array
  */
 $files = [
     'mod_mucronix_contact.xml',
+    'LICENSE',
+    'README.md',
     'script.php',
     'services/provider.php',
     'forms/contact.xml',

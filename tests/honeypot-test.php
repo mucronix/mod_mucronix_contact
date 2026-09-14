@@ -122,6 +122,17 @@ function request(string $url, string $jar, ?array $post = null, ?int &$status = 
 
     if ($body === false) {
         fwrite(STDERR, 'request failed: ' . curl_error($ch) . "\n");
+
+        /*
+         * A sending case waits on the mailer, and an unreachable SMTP host blocks for longer than
+         * the thirty seconds allowed here - so a mail outage arrives looking exactly like a dead
+         * site. The module writes the real reason to its log either way.
+         */
+        if (curl_errno($ch) === CURLE_OPERATION_TIMEDOUT && $post !== null) {
+            fwrite(STDERR, "  a submission timed out rather than the site being unreachable.\n");
+            fwrite(STDERR, "  check the end of the module log for an SMTP error before looking anywhere else.\n");
+        }
+
         exit(1);
     }
 

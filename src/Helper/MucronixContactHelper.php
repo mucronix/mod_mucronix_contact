@@ -741,6 +741,21 @@ class MucronixContactHelper implements DatabaseAwareInterface
         }
 
         /*
+         * The page cache plugin serves whole pages to guests from a store, and nothing the module
+         * can do reaches it: the veto event onPageCacheSetCaching is dispatched at onAfterRoute,
+         * long before any module is drawn, and only a plugin of the pagecache group may answer it.
+         * So this is said rather than handled, and it is said whenever the plugin is on - whether
+         * a guest can reach this particular form is not something that can be read from here.
+         */
+        if (PluginHelper::isEnabled('system', 'cache')) {
+            $warnings[] = [
+                'display' => Text::_('MOD_MUCRONIX_CONTACT_PAGE_CACHE_ON'),
+                'log'     => 'the page cache plugin is on; the page holding this form has to be excluded in its settings,'
+                    . ' or guests get a cached form token and, after a submission, a cached thank-you in place of the form',
+            ];
+        }
+
+        /*
          * Switched on and unusable is the quiet kind of broken: the form sends, the mail arrives and
          * the chat stays empty, with only the log to say why.
          */
