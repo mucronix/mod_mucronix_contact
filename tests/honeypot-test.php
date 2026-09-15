@@ -65,7 +65,19 @@ $telegram    = isset($options['telegram']);
 $successPage = isset($options['success-page']);
 $baseUrl = rtrim($options['url'] ?? 'http://joomla6/', '/') . '/';
 $page    = $options['page'] ?? '/';
-$logFile = $options['log'] ?? 'D:/OSPanel1/home/joomla6/administrator/logs/mod_mucronix_contact.php';
+$logFile = $options['log'] ?? 'administrator/logs/mod_mucronix_contact.php';
+
+/*
+ * The log is the only evidence that a message really went out, so a run without it would judge
+ * every sending case on nothing. The default is relative to the working directory, which suits a
+ * run from the site root; from anywhere else pass --log.
+ */
+if (!is_file($logFile)) {
+    fwrite(STDERR, 'no module log at: ' . $logFile . "\n");
+    fwrite(STDERR, "pass --log=<path to administrator/logs/mod_mucronix_contact.php>\n");
+    fwrite(STDERR, "the file appears once the module has logged something: switch on \"Log Sent Messages\" and send once\n");
+    exit(1);
+}
 
 /**
  * Fields the script fills itself, and whose values several cases depend on.
