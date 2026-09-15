@@ -17,6 +17,19 @@
 	php_minimum is what makes the minimum PHP version reach a site at all: the installer
 	never reads it from the extension manifest, only from here, and only when updating.
 	The install script is what covers a first install.
+
+	The checksum is read by Installer\InstallerHelper::isChecksumValid(), called from
+	com_installer's UpdateModel before the package is installed. Three things about it:
+
+	- only sha256, sha384 and sha512 are looked at, by those names in lower case
+	  (InstallerHelper.php:354). md5 and sha1 are not read at all.
+	- the update parser is flat: Update::_startElement() files every tag except update,
+	  updates and downloadsource straight into the current update, and _characterData()
+	  keys the text by the last tag, not by its path. So the element works anywhere
+	  inside <update>; it sits next to <downloads> here because that reads clearly.
+	- an empty element is worse than none. The check tests the property, not its text,
+	  and an empty one still counts as supplied - the comparison then fails and the
+	  update is refused outright instead of merely warning.
 -->
 <updates>
 	<update>
@@ -30,6 +43,7 @@
 		<downloads>
 			<downloadurl type="full" format="zip">https://github.com/mucronix/mod_mucronix_contact/releases/download/v1.0.0/mod_mucronix_contact-1.0.0.zip</downloadurl>
 		</downloads>
+		<sha256>c0a38538c3bd7dc14716f5e0b835148408fbc840d25f5c213b29f12619373cf7</sha256>
 		<changelogurl>https://github.com/mucronix/mod_mucronix_contact/releases</changelogurl>
 		<tags>
 			<tag>stable</tag>
