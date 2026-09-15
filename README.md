@@ -56,8 +56,8 @@ article, and the attachment field with its own list of accepted extensions and s
 
 **Telegram** — see below.
 
-**Appearance** — whether to load the module stylesheet, and three places to hang your template's
-own classes: around the form, on the form, and on the send button.
+**Appearance** — whether to load the module stylesheet, and four places to hang your template's
+own classes: around the form, on the form, around each field, and on the send button.
 
 **Advanced** — layout, module class suffix, and **Log Sent Messages**. Errors always go to
 `administrator/logs/mod_mucronix_contact.php`; successful sends only when you switch this on. Leave
@@ -150,6 +150,11 @@ is part of the number: write it in.
 Switch **Send to Telegram** on, paste the token and the chat id. Turn on **Send the Attachment Too**
 if you want files in the chat as well — images go as a photo, everything else as a file, and
 Telegram accepts at most 10 MB for a photo and 50 MB for a file.
+
+**Intro Line** opens the message, ahead of the fields. One bot often serves several forms, or
+several sites, and a chat message carries nothing to tell them apart the way a subject tells mails
+apart — so put the site or the form in there. Left empty, the message opens on the fields
+themselves.
 
 The email always goes first and is never held up by the chat. If Telegram refuses or does not
 answer, the visitor still sees the message go through and the reason is written to the module log.

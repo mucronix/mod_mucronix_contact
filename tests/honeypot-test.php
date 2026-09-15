@@ -890,6 +890,85 @@ function honeypotFieldCase(string $title, string $baseUrl, string $page, string 
 }
 
 /**
+ * The Field Class parameter, read from the markup.
+ *
+ * It has to reach the wrapper of every field, the ones added through Extra Fields included, and it
+ * has to stay off the trap: a class carrying a display of its own would put the honeypot back on
+ * the page, where real people fill it in and their messages are dropped without a word.
+ *
+ * Judged only by what this case controls: that whatever classes sit beside mcx-field-wrap are the
+ * same on all wrappers and absent from the trap. With the parameter empty there is nothing to
+ * judge, so the case says so and steps aside instead of passing for the wrong reason.
+ *
+ * @return  bool|null  null when the parameter is not set and the case did not run.
+ */
+function fieldClassCase(string $title, string $baseUrl, string $page): ?bool
+{
+    $html = readForm(request($baseUrl . ltrim($page, '/'), newJar()))['html'];
+
+    preg_match_all('/<div class="([^"]*\bmcx-field-wrap\b[^"]*)"/', $html, $found);
+
+    $wrappers = $found[1];
+    $classesOf = static fn (string $list): array => array_values(
+        array_diff(preg_split('/\s+/', trim($list)) ?: [], ['mcx-field-wrap', ''])
+    );
+
+    if ($wrappers === []) {
+        report($title, 'no wrappers', 'on every wrap', 0, false, false);
+        echo "  no .mcx-field-wrap in the form at all: the layout is not the one this suite knows\n";
+
+        return false;
+    }
+
+    $extra = $classesOf($wrappers[0]);
+
+    if ($extra === []) {
+        echo "\nskipped: the Field Class case. Put a class into Field Class on the Appearance tab,\n";
+        echo "    for example mcx-probe, and run again. Empty, it proves nothing.\n";
+
+        return null;
+    }
+
+    sort($extra);
+    $wrong = [];
+
+    foreach ($wrappers as $i => $list) {
+        $here = $classesOf($list);
+        sort($here);
+
+        if ($here !== $extra) {
+            $wrong[] = 'wrapper ' . ($i + 1) . ' of ' . \count($wrappers) . ' carries "'
+                . implode(' ', $here) . '" instead of "' . implode(' ', $extra) . '"';
+        }
+    }
+
+    // The trap sits in its own branch of the layout and takes neither the base class nor the parameter
+    if (preg_match('/<div class="([^"]*)"[^>]*\shidden>/i', $html, $trap)) {
+        foreach (array_merge(['mcx-field-wrap'], $extra) as $class) {
+            if (preg_match('/\b' . preg_quote($class, '/') . '\b/', $trap[1])) {
+                $wrong[] = 'the trap wrapper carries "' . $class . '": a class of its own can put it back on the page';
+            }
+        }
+    } else {
+        $wrong[] = 'no hidden wrapper in the form: the trap is not where this case can check it';
+    }
+
+    $ok = $wrong === [];
+
+    report($title, $ok ? 'on every wrap' : 'wrong', 'on every wrap', 0, false, $ok);
+
+    foreach ($wrong as $line) {
+        echo '  ', $line, "\n";
+    }
+
+    if ($ok) {
+        echo '  class "', implode(' ', $extra), '" on all ', \count($wrappers), " wrappers, none on the trap\n";
+    }
+
+    return $ok;
+}
+
+/**
  * A submission without JavaScript while a thank-you page is set.
  *
  * The answer to the post has to be a 303 pointing at that page rather than back at the form, and
@@ -1292,6 +1371,17 @@ $failures += pageFieldCase('page: the form carries its own address', $baseUrl, $
 // The trap itself, read from the markup: the sending cases above supply mcx_hp on their own
 $total++;
 $failures += honeypotFieldCase('honeypot: present and submittable', $baseUrl, $page, $logFile) ? 0 : 1;
+
+/*
+ * The Field Class parameter, also from the markup. Skipped when it is empty: a case that cannot
+ * fail is the shape every empty check in this suite has taken before.
+ */
+$fieldClassVerdict = fieldClassCase('fields: class parameter on every wrapper', $baseUrl, $page);
+
+if ($fieldClassVerdict !== null) {
+    $total++;
+    $failures += $fieldClassVerdict ? 0 : 1;
+}
 
 /*
  * A spent token, both ways it happens. The second is the one that was answering "could not be
