@@ -67,6 +67,11 @@ $baseUrl = rtrim($options['url'] ?? 'http://joomla6/', '/') . '/';
 $page    = $options['page'] ?? '/';
 $logFile = $options['log'] ?? 'D:/OSPanel1/home/joomla6/administrator/logs/mod_mucronix_contact.php';
 
+/**
+ * Fields the script fills itself, and whose values several cases depend on.
+ */
+const BASE_FIELDS = ['name', 'email', 'message', 'consent', 'captcha', 'mcx_hp', 'attachment'];
+
 $failures = 0;
 $jars     = [];
 
@@ -291,11 +296,142 @@ function fields(array $form, string $captcha, string $honeypot, string $name = '
         $form['token']        => '1',
     ];
 
+    /*
+     * Anything else the form insists on. Extra fields come from a module parameter, so the script
+     * cannot know them in advance; a required one it did not fill used to sink every sending case
+     * at once - twelve reds spread over a run with the reason named in none of them.
+     */
+    foreach (requiredExtras($form) as $field => $value) {
+        $post[$prefix . '[' . $field . ']'] = $value;
+    }
+
     foreach ($extra as $field => $value) {
         $post[$prefix . '[' . $field . ']'] = $value;
     }
 
     return $post;
+}
+
+/**
+ * The required fields the script does not already know about, with a value each.
+ *
+ * The base fields keep their own: several cases turn on what is in them, and one on a value being
+ * absent. Only what the extra fields added is filled in here.
+ */
+function requiredExtras(array $form): array
+{
+    static $cache = [];
+
+    if (isset($cache[$form['moduleId']])) {
+        return $cache[$form['moduleId']];
+    }
+
+    $filled = [];
+
+    foreach (describeFields($form) as $field => $about) {
+        if (\in_array($field, BASE_FIELDS, true) || !$about['required']) {
+            continue;
+        }
+
+        $value = fillFor($about);
+
+        if ($value !== null) {
+            $filled[$field] = $value;
+        }
+    }
+
+    return $cache[$form['moduleId']] = $filled;
+}
+
+/**
+ * Every named control in the form: its tag, its type, whether it is required, and for a list the
+ * first option that carries a value.
+ */
+function describeFields(array $form): array
+{
+    $prefix = 'mcx_' . $form['moduleId'];
+    $found  = [];
+
+    // A select is taken with its body, so a list can be answered with an option it really has
+    $pattern = '/<(input|textarea|select)\b([^>]*name="' . preg_quote($prefix, '/')
+        . '\[([a-zA-Z0-9_]+)\]"[^>]*)>(?:(.*?)<\/select>)?/s';
+
+    preg_match_all($pattern, $form['html'], $matches, PREG_SET_ORDER);
+
+    foreach ($matches as $match) {
+        $tag        = $match[1];
+        $attributes = $match[2];
+        $field      = $match[3];
+        $body       = $match[4] ?? '';
+
+        preg_match('/\btype="([a-z-]+)"/i', $attributes, $type);
+        preg_match('/value="([^"]+)"/', $body, $option);
+
+        // A radio or checkbox group repeats one name; one required member makes the group required
+        $found[$field] = [
+            'tag'         => $tag,
+            'type'        => strtolower($type[1] ?? ''),
+            'required'    => ($found[$field]['required'] ?? false) || str_contains($attributes, 'required'),
+            'firstOption' => $found[$field]['firstOption'] ?? ($option[1] ?? null),
+            'calendar'    => str_contains($attributes, 'data-alt-value') || str_contains($match[0], 'field-calendar'),
+        ];
+    }
+
+    return $found;
+}
+
+/**
+ * A value a field of this shape will accept, or null where the script has no business guessing.
+ */
+function fillFor(array $about): ?string
+{
+    if ($about['tag'] === 'select' || $about['type'] === 'radio') {
+        return $about['firstOption'];
+    }
+
+    if ($about['calendar']) {
+        return '2026-01-01 00:00:00';
+    }
+
+    return match ($about['type']) {
+        'checkbox' => '1',
+        'number'   => '1',
+        'email'    => 'extra@example.com',
+        'url'      => 'https://example.com',
+        'tel'      => '+10000000000',
+        'text', '' => 'Automated check',
+        default    => null,
+    };
+}
+
+/**
+ * Stops the run when the form asks for something the script cannot answer.
+ *
+ * Once, here, rather than as a spread of failures further down with the cause named in none of
+ * them: a required field left empty refuses every submission, so every sending case goes red.
+ */
+function requireFillable(array $form): void
+{
+    $filled   = requiredExtras($form);
+    $hopeless = [];
+
+    foreach (describeFields($form) as $field => $about) {
+        if (\in_array($field, BASE_FIELDS, true) || !$about['required'] || isset($filled[$field])) {
+            continue;
+        }
+
+        $hopeless[] = $field . ' (' . ($about['type'] ?: $about['tag']) . ')';
+    }
+
+    if ($hopeless !== []) {
+        fwrite(STDERR, "the form has required fields this script cannot fill:\n  " . implode("\n  ", $hopeless) . "\n");
+        fwrite(STDERR, "every sending case would fail on them. Make them optional, or take them out of the Extra Fields tab.\n");
+        exit(1);
+    }
+
+    if ($filled !== []) {
+        echo 'filling required extra fields: ', implode(', ', array_keys($filled)), "\n";
+    }
 }
 
 /**
@@ -1030,6 +1166,12 @@ function expiredCaptchaCase(string $baseUrl, string $page, string $jar, string $
 
 echo "target: ", $baseUrl, ltrim($page, '/'), "\nlog:    $logFile\n";
 echo "requires \"Log Sent Messages\" to be on in the module settings, Advanced tab.\n\n";
+
+/*
+ * Before anything is sent: a required field the script cannot fill would refuse every
+ * submission, and the run would be a spread of reds with the cause named in none of them.
+ */
+requireFillable(readForm(request($baseUrl . ltrim($page, "/"), newJar())));
 
 // Without JavaScript: the form posts to the page itself
 $plain = newJar();
