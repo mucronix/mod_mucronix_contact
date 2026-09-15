@@ -18,6 +18,7 @@
 		     ships no README inside an extension; this is a deliberate departure. -->
 		<filename>LICENSE</filename>
 		<filename>README.md</filename>
+		<filename>README.ru.md</filename>
 		<folder module="mod_mucronix_contact">services</folder>
 		<folder>forms</folder>
 		<folder>layouts</folder>

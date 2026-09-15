@@ -1,5 +1,7 @@
 # Mucronix Contact
 
+[🇷🇺 Русская версия](README.ru.md)
+
 A contact form that sits in the page. The visitor fills it in, presses Send, and the message goes
 to the site owner by email and, if you want it to, to a Telegram chat. The page does not reload.
 

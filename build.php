@@ -80,6 +80,7 @@ $files = [
     'mod_mucronix_contact.xml',
     'LICENSE',
     'README.md',
+    'README.ru.md',
     'script.php',
     'services/provider.php',
     'forms/contact.xml',
