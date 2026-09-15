@@ -7,7 +7,7 @@
 	<license>GNU General Public License version 2 or later; see LICENSE</license>
 	<authorEmail>support@mucronix.com</authorEmail>
 	<authorUrl>https://mucronix.com</authorUrl>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<description>MOD_MUCRONIX_CONTACT_XML_DESCRIPTION</description>
 	<scriptfile>script.php</scriptfile>
 	<namespace path="src">Mucronix\Module\MucronixContact</namespace>
@@ -311,6 +311,16 @@
 				/>
 
 				<field
+					name="telegram_intro"
+					type="text"
+					label="MOD_MUCRONIX_CONTACT_FIELD_TELEGRAM_INTRO_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_TELEGRAM_INTRO_DESC"
+					filter="string"
+					maxlength="200"
+					showon="telegram_enabled:1"
+				/>
+
+				<field
 					name="telegram_attach"
 					type="radio"
 					layout="joomla.form.field.radio.switcher"
@@ -371,6 +381,14 @@
 					type="text"
 					label="MOD_MUCRONIX_CONTACT_FIELD_SUBMIT_CLASS_LABEL"
 					description="MOD_MUCRONIX_CONTACT_FIELD_SUBMIT_CLASS_DESC"
+					validate="CssIdentifier"
+				/>
+
+				<field
+					name="field_class"
+					type="text"
+					label="MOD_MUCRONIX_CONTACT_FIELD_FIELD_CLASS_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_FIELD_CLASS_DESC"
 					validate="CssIdentifier"
 				/>
 			</fieldset>

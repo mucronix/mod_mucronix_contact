@@ -95,7 +95,13 @@ class TelegramSender
 
         $this->call($token, 'sendMessage', [
             'chat_id' => $chatId,
-            'text'    => $this->getText($form, $data, $pageUrl, $attachment),
+            'text'    => $this->getText(
+                $form,
+                $data,
+                $pageUrl,
+                $attachment,
+                trim((string) $params->get('telegram_intro', ''))
+            ),
         ]);
 
         if ($attachment === null || !$params->get('telegram_attach', 0)) {
@@ -116,14 +122,30 @@ class TelegramSender
      * @param   array       $data        The filtered and validated form data.
      * @param   string      $pageUrl     The page the form was sent from.
      * @param   array|null  $attachment  The attached file, when there is one.
+     * @param   string      $intro       Line to open the message with, empty for none.
      *
      * @return  string
      *
      * @since   1.0.0
      */
-    private function getText(Form $form, array $data, string $pageUrl, ?array $attachment = null): string
-    {
+    private function getText(
+        Form $form,
+        array $data,
+        string $pageUrl,
+        ?array $attachment = null,
+        string $intro = ''
+    ): string {
         $lines = [];
+
+        /*
+         * One bot often serves several forms, or several sites, and a chat message carries nothing
+         * to tell them apart: a mail has its subject, this has not. Empty by default, and empty
+         * means the message opens on the fields themselves, with no blank line in front of them.
+         */
+        if ($intro !== '') {
+            $lines[] = $intro;
+            $lines[] = '';
+        }
 
         foreach (MessageFields::collect($form, $data) as $field) {
             $lines[] = $field['label'] . ': ' . $field['value'];

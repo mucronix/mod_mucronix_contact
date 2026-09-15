@@ -37,6 +37,13 @@ $wrapperClass = trim('mcx ' . $params->get('wrapper_class', ''));
 $formClass    = trim('mcx-form ' . $params->get('form_class', ''));
 $submitClass  = trim('mcx-submit ' . $params->get('submit_class', ''));
 
+/*
+ * The box around one field, and the honeypot is deliberately not one of them: it is hidden by the
+ * markup, and a class carrying a display of its own would bring it back into view, where real
+ * people fill it in and their messages are dropped without a word.
+ */
+$fieldClass   = trim('mcx-field-wrap ' . $params->get('field_class', ''));
+
 $sent         = $result !== null && $result['success'];
 $messageClass = $result === null ? '' : ' mcx-message--' . ($result['success'] ? 'ok' : 'error');
 $fieldErrors  = $result['errors'] ?? [];
@@ -100,7 +107,7 @@ Text::script('MOD_MUCRONIX_CONTACT_ERROR_SEND');
                     <?php /* Our own wrapper holds the field and everything that belongs to it. The core
                              layout has no slot for a message, and the vertical rhythm is set on this
                              wrapper in the CSS, so the text cannot drift towards the next field. */ ?>
-                    <div class="mcx-field-wrap">
+                    <div class="<?php echo htmlspecialchars($fieldClass, ENT_QUOTES, 'UTF-8'); ?>">
                         <?php echo $field->renderField(['class' => 'mcx-field mcx-field--' . $field->fieldname
                             . ($field->fieldname === 'consent' ? ' mcx-consent' : '')
                             . ($error !== '' ? ' is-invalid' : '')]); ?>

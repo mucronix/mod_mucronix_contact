@@ -25,7 +25,7 @@
 			name="message"
 			type="textarea"
 			label="MOD_MUCRONIX_CONTACT_FORM_MESSAGE_LABEL"
-			rows="6"
+			rows="4"
 			maxlength="5000"
 			filter="string"
 			required="true"

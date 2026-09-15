@@ -189,20 +189,53 @@ for logged-in users alone.
 
 ## Styling
 
-The module ships a small stylesheet that sets the spacing between fields, the width of the inputs,
-the consent checkbox, the highlighting of errors and the message block. It draws no card, no
-background, no border and no shadow: that is your template's job, through **Wrapper Class**. For a
-Bootstrap template `card p-4 shadow-sm` works; on YOOtheme
-`uk-card uk-card-default uk-box-shadow-medium`.
+Three ways in, from the plainest up. Nothing stops you mixing them.
 
-Colours and the corner radius are variables, so one line in your own CSS changes them all:
+### 1. Classes from the module settings
+
+The **Appearance** tab carries four class fields. Each is added to the module's own class rather
+than put in its place, so the stylesheet and the script keep working whatever you hang on them.
+
+| Setting | Lands on | Bootstrap | YOOtheme |
+|---|---|---|---|
+| Wrapper Class | the box around the whole form | `card p-4 shadow-sm` | `uk-card uk-card-default` |
+| Form Class | the `<form>` itself | — | — |
+| Field Class | the box around one field, its error message included | `mb-3` | `uk-margin` |
+| Button Class | the send button | `btn btn-primary` | `uk-button uk-button-primary` |
+
+This is where the width comes from as well: the module sets none, so the form is as wide as whatever
+it stands in.
+
+Field Class reaches every field, the ones added through Extra Fields included. One field is kept out
+of it — the hidden one that catches robots. A class of your own could give that field a display and
+bring it back into the page, where real people would fill it in and their messages would be thrown
+away without a word to anyone.
+
+### 2. Variables from your own CSS
+
+The module ships a small stylesheet: the spacing between fields, the width of the inputs, the
+consent checkbox, the highlighting of errors and the message block. It draws no card, no background,
+no border and no shadow — that is the template's job, through Wrapper Class above.
+
+What it does draw is held in variables, so one line in your template's CSS changes it everywhere:
 
 ```css
 .mcx {
     --mcx-accent: #1f5aa8;
     --mcx-radius: 8px;
+    --mcx-gap: 10px;
 }
 ```
+
+| Variable | Sets | Default |
+|---|---|---|
+| `--mcx-gap` | the air between one field and the next | `12px` |
+| `--mcx-label-gap` | the air between a label and its own field | `2px` |
+| `--mcx-accent` | the consent checkbox | `#2f6fbf` |
+| `--mcx-radius` | the corner radius of the message and notice blocks | `4px` |
+| `--mcx-ok`, `--mcx-ok-bg` | the block shown once a message has gone | `#27884a`, `#eaf6ee` |
+| `--mcx-error`, `--mcx-error-bg` | refusals, and the fields they belong to | `#c0392b`, `#fdecea` |
+| `--mcx-notice`, `--mcx-notice-bg` | the notice only site managers are shown | `#b8860b`, `#fff8e5` |
 
 > ⚠️ **Give `--mcx-accent` a dark colour.** It tints the consent checkbox through `accent-color`,
 > which paints the box while the browser draws the tick on top of it in white, and the tick cannot
@@ -214,6 +247,41 @@ Colours and the corner radius are variables, so one line in your own CSS changes
 
 Switch the stylesheet off entirely with **Load Module CSS** if your template dresses its forms.
 
+### 3. Overriding the layout
+
+Copy `tmpl/default.php` to `templates/<your template>/html/mod_mucronix_contact/default.php` and
+edit the copy. Joomla finds it by itself, and updates leave it alone.
+
+> ⚠️ **This layout is more than markup.** It carries the wiring the sending runs on, and most of
+> what can break here breaks quietly: the form still looks right, and only the messages stop
+> arriving.
+
+Drop any of these and **the form stops sending**:
+
+- the hidden `mcx_module_id`, which tells the module which of its instances was used;
+- the hidden `mcx_page`, the address a message is reported as coming from;
+- the token printed by `HTMLHelper::_('form.token')`;
+- `enctype="multipart/form-data"` on the `<form>`, without which an attachment never arrives;
+- the loop that renders the fields: their names are built from the module id, and inputs written
+  out by hand will not answer to them.
+
+Drop any of these and **the AJAX layer dies without a sound** — the form falls back to a plain post,
+goes on working, and nobody notices:
+
+- the class `mcx` on the outer element;
+- the class `mcx-form` on the `<form>`;
+- the `<form>` staying inside that outer element, because the handler listens there;
+- the two lines that register and load the script;
+- the `Text::script(...)` lines, without which the button and the error fall back to English.
+
+Drop any of these and **messages land in the wrong place, or nowhere**:
+
+- the `mcx-message` block, where everything after a submission is written;
+- `mcx-submit` on the button, which is how it says it is sending;
+- `mcx-field--<name>` on each field, which is how an error finds the field it belongs to;
+- `mcx-field-wrap` around a field, which is where that error is put;
+- `id="mcx-<module id>"` on the outer element, the anchor a submission without JavaScript returns to;
+- the hidden trap field, whose loss shows nowhere and costs the protection.
 ---
 
 ## Things worth knowing

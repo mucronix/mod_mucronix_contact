@@ -11,7 +11,8 @@
  *
  * What this file does not do: card, background, border and shadow around the form. Those come from
  * the template, through the Wrapper Class parameter. Fonts and text sizes are the template's too.
- * Colours and the corner radius are variables, so one line in the site CSS changes them all.
+ * Colours, the corner radius and the vertical spacing are variables, so one line in the site CSS
+ * changes them all.
  */
 
 .mcx {
@@ -24,6 +25,10 @@
     --mcx-notice-bg: #fff8e5;
     --mcx-border: #ddd;
     --mcx-radius: 4px;
+
+    /* The air between one field and the next, and between a label and its own field */
+    --mcx-gap: 12px;
+    --mcx-label-gap: 2px;
 }
 
 /*
@@ -42,19 +47,27 @@
 /*
  * The rhythm lives on the wrapper, which holds a field and the message belonging to it together.
  * The field itself is flattened, or the message would drift towards the field below it.
+ *
+ * Flattened on BOTH sides, and that is the whole point. A template gives .control-group a margin of
+ * its own - Cassiopeia writes `margin: 1em 0` - and zeroing only the bottom leaves the top one. It
+ * collapses through this wrapper and then with the wrapper above, so the gap stays at whatever the
+ * template said however small --mcx-gap is set. Measured on Cassiopeia: lowering only the wrapper
+ * from 16px to 12px took 4px off a ten-field form instead of 40, and the 4px were the last field's
+ * bottom margin, which has nothing below it to collapse with.
  */
 .mcx .mcx-field-wrap {
-    margin-bottom: 16px;
+    margin-bottom: var(--mcx-gap);
 }
 
 .mcx .mcx-field {
+    margin-top: 0;
     margin-bottom: 0;
 }
 
 /* The label is two levels down: renderfield builds .control-group > .control-label > label */
 .mcx .mcx-field .control-label {
     display: block;
-    margin-bottom: 4px;
+    margin-bottom: var(--mcx-label-gap);
 }
 
 /*
