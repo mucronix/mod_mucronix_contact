@@ -99,17 +99,19 @@
 
 ```
 mod_mucronix_contact/
-├── mod_mucronix_contact.xml          манифест
+├── mod_mucronix_contact.xml         манифест
+├── script.php                       установочный скрипт: PHP >= 8.3, Joomla >= 6.0
 ├── LICENSE
 ├── README.md
-├── README.ru.md                      то же по-русски, не перевод
+├── README.ru.md                     то же по-русски, не перевод
 ├── services/
 │   └── provider.php                 регистрация в DI-контейнере
 ├── src/
 │   ├── Dispatcher/
 │   │   └── Dispatcher.php           наследник AbstractModuleDispatcher
 │   └── Helper/
-│       ├── MucronixContactHelper.php      построение формы, валидация, отправка
+│       ├── MucronixContactHelper.php    построение формы, валидация, отправка
+│       ├── MessageFields.php        обход полей, общий для письма и Telegram
 │       ├── MailSender.php           отправка письма
 │       └── TelegramSender.php       отправка в Telegram
 ├── tmpl/
@@ -119,15 +121,25 @@ mod_mucronix_contact/
 │   └── contact.xml                  описание базовых полей формы
 ├── layouts/
 │   └── mucronix/form/field/file.php копия ядрового макета, одна изменённая строка
-├── tests/
-│   └── honeypot-test.php            проверка отправки скриптом, в пакет не входит
 ├── media/                           (ставится в media/mod_mucronix_contact/)
+│   ├── joomla.asset.json
 │   ├── css/form.css
 │   └── js/form.js
-└── language/
-    ├── en-GB/
-    ├── ru-RU/
-    └── uk-UA/
+├── language/                        в каждой папке по два файла:
+│   ├── en-GB/                       mod_mucronix_contact.ini и .sys.ini
+│   ├── ru-RU/
+│   └── uk-UA/
+│
+│   ниже — то, что лежит в каталоге, но в пакет не идёт:
+├── tests/
+│   └── honeypot-test.php            проверка отправки скриптом
+├── update/
+│   └── mod_mucronix_contact.xml     сервер обновлений, выкладывается на mucronix.com
+├── build.php                        сборка ZIP
+├── build/                           готовые архивы, в репозиторий не идут
+├── TZ-mod_mucronix_contact.md       это техзадание
+├── .gitattributes                   окончания строк LF в рабочем дереве
+└── .gitignore
 ```
 
 Точную структуру namespace-объявления в манифесте и схему `services/provider.php`
@@ -1087,6 +1099,10 @@ Network → **Disable cache**, либо **Ctrl+Shift+R**. У `form.css` отпе
 ---
 
 ## 18. Что обязательно попадёт в README
+
+Требования ниже относятся к **обеим версиям** — `README.md` и `README.ru.md`.
+Содержательно они равны, поэтому правка в одной без другой сразу даёт
+расхождение. Основной считается английская, см. раздел 14.
 
 Слабое место Telegram — не код, а настройка. Автор Wedal сам признаёт, что инструкции у него
 нет, и в комментариях к статье человек пишет, что письма приходят, а Telegram молчит.
