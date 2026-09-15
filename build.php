@@ -153,3 +153,13 @@ for ($i = 0; $i < $check->numFiles; $i++) {
 }
 
 $check->close();
+
+/*
+ * The sixth place the version reaches is the checksum in update.xml, and this script cannot check
+ * that one: Joomla hashes the file it downloads from the release, and at build time the release
+ * does not exist yet. So the sum is printed rather than verified - copy it into <sha256> once the
+ * release is up. Hashing the archive here is safe: GitHub hands the asset back byte for byte, and
+ * that was checked by downloading 1.0.0 and comparing. The release order is in section 14 of the
+ * spec; getting it wrong offers an update that cannot be downloaded or one that is refused.
+ */
+echo 'sha256:  ', hash_file('sha256', $out), "\n";
