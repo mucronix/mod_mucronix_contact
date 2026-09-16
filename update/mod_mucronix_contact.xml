@@ -43,10 +43,7 @@
 		<downloads>
 			<downloadurl type="full" format="zip">https://github.com/mucronix/mod_mucronix_contact/releases/download/v1.0.1/mod_mucronix_contact-1.0.1.zip</downloadurl>
 		</downloads>
-		<!-- <sha256> — шаг 5 порядка выпуска (ТЗ §14): сумма снимается
-		     с файла, скачанного из релиза, и вписывается сюда перед выкладкой на хостинг.
-		     Пустой элемент ставить нельзя: он считается заполненным, и обновление
-		     будет отклонено, а не просто сопровождено предупреждением. -->
+		<sha256>7edc6c6debea303d641a85f5f0e069f1d6381d1f0dbab1f139b0247072bde5aa</sha256>
 		<changelogurl>https://github.com/mucronix/mod_mucronix_contact/releases</changelogurl>
 		<tags>
 			<tag>stable</tag>
