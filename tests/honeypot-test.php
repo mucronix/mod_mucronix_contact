@@ -43,7 +43,8 @@
  *
  * Usage:
  *   php tests/honeypot-test.php [--url=http://joomla6/] [--page=/] [--log=<path>] [--slow] [--telegram]
- *                              [--success-page] [--markup=joomla|uikit|none [--markup-only]]
+ *                              [--success-page] [--markup=joomla|uikit|none] [--style=full|base|none]
+ *                              [--page-only]
  *
  * --slow adds the expired captcha case, which idles about five minutes.
  *
@@ -52,8 +53,14 @@
  * setting is asserted on the command line rather than guessed. Choose one in the Basic tab first.
  *
  * --markup adds the Field Markup case, and names the variant set on the Appearance tab: the page cannot
- * tell a variant from the same classes typed into Button Class. With --markup-only that case runs alone
- * and nothing is sent, so all three variants can be checked one after another.
+ * tell a variant from the same classes typed into Button Class.
+ *
+ * --style adds the Module Style case and names the value set on the Appearance tab, for the same
+ * reason: the stylesheets on the page are what is being judged, so they cannot be what tells the
+ * value.
+ *
+ * --page-only runs just the cases asked for with --markup and --style and sends nothing, so every
+ * variant can be checked one after another without a round of messages each time.
  *
  * --telegram adds the case for sending to Telegram, and says so because nothing in the page shows
  * whether it is switched on. The case asks one thing: with Telegram on, the message still goes out.
@@ -64,20 +71,26 @@
  * Exit code 0 when every case behaves as it should, 1 otherwise.
  */
 
-$options     = getopt('', ['url::', 'page::', 'log::', 'slow', 'telegram', 'success-page', 'markup:', 'markup-only']);
+$options     = getopt('', ['url::', 'page::', 'log::', 'slow', 'telegram', 'success-page', 'markup:', 'style:', 'page-only']);
 $slow        = isset($options['slow']);
 $telegram    = isset($options['telegram']);
 $successPage = isset($options['success-page']);
 $markup      = $options['markup'] ?? null;
-$markupOnly  = isset($options['markup-only']);
+$style       = $options['style'] ?? null;
+$pageOnly    = isset($options['page-only']);
 
 if ($markup !== null && !in_array($markup, ['joomla', 'uikit', 'none'], true)) {
     fwrite(STDERR, "--markup takes joomla, uikit or none\n");
     exit(1);
 }
 
-if ($markupOnly && $markup === null) {
-    fwrite(STDERR, "--markup-only needs --markup=joomla|uikit|none: the page cannot say which one was chosen\n");
+if ($style !== null && !in_array($style, ['full', 'base', 'none'], true)) {
+    fwrite(STDERR, "--style takes full, base or none\n");
+    exit(1);
+}
+
+if ($pageOnly && $markup === null && $style === null) {
+    fwrite(STDERR, "--page-only needs --markup or --style: the page cannot say which value was chosen\n");
     exit(1);
 }
 $baseUrl = rtrim($options['url'] ?? 'http://joomla6/', '/') . '/';
@@ -892,7 +905,7 @@ function honeypotFieldCase(string $title, string $baseUrl, string $page, string 
 
     // Hidden by the markup, so that switching the module CSS off cannot put it back on the page
     if (!preg_match('/<div class="mcx-hp"[^>]*\shidden/i', $form['html'])) {
-        $wrong[] = 'the wrapper has no hidden attribute: with load_css off the field becomes visible';
+        $wrong[] = 'the wrapper has no hidden attribute: with Module Style "None" the field becomes visible';
     }
 
     $ok = $wrong === [];
@@ -1179,6 +1192,80 @@ function markupCase(string $title, string $markup, string $baseUrl, string $page
 
     if ($absent !== []) {
         echo '  not on the page, so not checked: ', implode(', ', $absent), "\n";
+    }
+
+    return $ok;
+}
+
+/**
+ * The Module Style, read from the page.
+ *
+ * "Full" links form-base.css and then form-theme.css, "Basic" the first alone, "None" neither. The
+ * stylesheet of 1.0.x, form.css, must not be asked for in any of them: it is no longer shipped, and
+ * a link to it would be a 404 on every page with the form.
+ *
+ * The trap has to stay hidden in all three. The hidden attribute is checked by the honeypot case;
+ * this one checks the second lock, which lives in form-base.css while that is linked and has to be
+ * printed inline when it is not. With the file linked, its content is fetched and read: a link to a
+ * stylesheet that lost the rule would look the same from the page.
+ */
+function styleCase(string $title, string $style, string $baseUrl, string $page): bool
+{
+    $jar  = newJar();
+    $form = readForm(request($baseUrl . ltrim($page, '/'), $jar));
+    $html = $form['html'];
+
+    preg_match_all('/<link\b[^>]*\bhref="([^"]*mod_mucronix_contact\/css\/([a-z-]+)(?:\.min)?\.css[^"]*)"/i', $html, $links, PREG_SET_ORDER);
+
+    $order = array_column($links, 2);
+    $hrefs = array_column($links, 1, 2);
+    $want  = ['full' => ['form-base', 'form-theme'], 'base' => ['form-base'], 'none' => []][$style];
+    $wrong = [];
+
+    if ($order !== $want) {
+        $wrong[] = 'stylesheets linked: ' . ($order ? implode(', ', $order) : 'none')
+            . ', expected: ' . ($want ? implode(', ', $want) : 'none');
+    }
+
+    $lock = '/\.mcx\s+\.mcx-hp\s*\{\s*display\s*:\s*none\s*;?\s*\}/';
+
+    if (in_array('form-base', $order, true)) {
+        $href = html_entity_decode($hrefs['form-base'], ENT_QUOTES, 'UTF-8');
+
+        // A link starting at the root is resolved against the site the page came from
+        if (!preg_match('~^https?://~', $href)) {
+            $origin = preg_replace('~^(https?://[^/]+).*$~', '$1', $form['base'] ?: $baseUrl);
+            $href   = $origin . '/' . ltrim($href, '/');
+        }
+
+        $css = request($href, $jar, null, $status);
+
+        if ($status !== 200) {
+            $wrong[] = 'form-base.css answered http ' . $status . ' at ' . $href;
+        } elseif (!preg_match($lock, $css)) {
+            $wrong[] = 'form-base.css is linked but holds no ".mcx .mcx-hp { display: none; }"';
+        }
+    } else {
+        preg_match_all('/<style\b[^>]*>(.*?)<\/style>/is', $html, $blocks);
+
+        $inline = count(array_filter($blocks[1], static fn (string $block): bool => (bool) preg_match($lock, $block)));
+
+        if ($inline !== 1) {
+            $wrong[] = 'without form-base.css the inline lock on the trap is printed ' . $inline . ' times, expected once';
+        }
+    }
+
+    $ok = $wrong === [];
+
+    report($title, $ok ? $style : 'wrong', $style, 0, false, $ok);
+
+    foreach ($wrong as $line) {
+        echo '  ', $line, "\n";
+    }
+
+    if ($ok) {
+        echo '  linked: ', $order ? implode(', ', $order) : 'nothing', '; the trap locked by ',
+            in_array('form-base', $order, true) ? 'form-base.css' : 'an inline style', "\n";
     }
 
     return $ok;
@@ -1475,19 +1562,30 @@ echo "target: ", $baseUrl, ltrim($page, '/'), "\nlog:    $logFile\n";
 echo "requires \"Log Sent Messages\" to be on in the module settings, Advanced tab.\n\n";
 
 /*
- * The Field Markup alone sends nothing, so it can be run once per variant without a full round of
- * messages each time: switch the setting, run with --markup-only.
+ * The cases that only read the page send nothing, so they can be run once per value of a setting
+ * without a full round of messages each time: switch the setting, run with --page-only.
  */
-if ($markupOnly) {
-    $ok = markupCase('markup: ' . $markup . ' classes on every field', $markup, $baseUrl, $page);
+if ($pageOnly) {
+    $failed = 0;
+    $asked  = 0;
+
+    if ($markup !== null) {
+        $asked++;
+        $failed += markupCase('markup: ' . $markup . ' classes on every field', $markup, $baseUrl, $page) ? 0 : 1;
+    }
+
+    if ($style !== null) {
+        $asked++;
+        $failed += styleCase('style: ' . $style . ', stylesheets and the trap', $style, $baseUrl, $page) ? 0 : 1;
+    }
 
     foreach ($jars as $jar) {
         @unlink($jar);
     }
 
-    echo "\n", $ok ? "OK: every case behaves as it should\n" : "FAILED: 1 of 1\n";
+    echo "\n", $failed === 0 ? "OK: every case behaves as it should\n" : "FAILED: $failed of $asked\n";
 
-    exit($ok ? 0 : 1);
+    exit($failed === 0 ? 0 : 1);
 }
 
 /*
@@ -1621,6 +1719,14 @@ if ($markup !== null) {
     $failures += markupCase('markup: ' . $markup . ' classes on every field', $markup, $baseUrl, $page) ? 0 : 1;
 } else {
     echo "\nskipped: the Field Markup case. Pass --markup=joomla|uikit|none, the value set on the Appearance tab.\n";
+}
+
+// The Module Style, only with --style, for the same reason
+if ($style !== null) {
+    $total++;
+    $failures += styleCase('style: ' . $style . ', stylesheets and the trap', $style, $baseUrl, $page) ? 0 : 1;
+} else {
+    echo "\nskipped: the Module Style case. Pass --style=full|base|none, the value set on the Appearance tab.\n";
 }
 
 /*

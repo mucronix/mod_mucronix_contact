@@ -362,17 +362,19 @@
 					<option value="none">MOD_MUCRONIX_CONTACT_FIELD_MARKUP_NONE</option>
 				</field>
 
+				<!-- Replaces load_css of 1.0.x: "Basic" is that stylesheet unchanged, "None" is load_css
+				     switched off. -->
 				<field
-					name="load_css"
-					type="radio"
-					layout="joomla.form.field.radio.switcher"
-					label="MOD_MUCRONIX_CONTACT_FIELD_LOAD_CSS_LABEL"
-					description="MOD_MUCRONIX_CONTACT_FIELD_LOAD_CSS_DESC"
-					default="1"
-					filter="integer"
+					name="style_mode"
+					type="list"
+					label="MOD_MUCRONIX_CONTACT_FIELD_STYLE_MODE_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_STYLE_MODE_DESC"
+					default="full"
+					validate="options"
 					>
-					<option value="0">JNO</option>
-					<option value="1">JYES</option>
+					<option value="full">MOD_MUCRONIX_CONTACT_FIELD_STYLE_MODE_FULL</option>
+					<option value="base">MOD_MUCRONIX_CONTACT_FIELD_STYLE_MODE_BASE</option>
+					<option value="none">MOD_MUCRONIX_CONTACT_FIELD_STYLE_MODE_NONE</option>
 				</field>
 
 				<field

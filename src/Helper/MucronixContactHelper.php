@@ -164,6 +164,23 @@ class MucronixContactHelper implements DatabaseAwareInterface
     private const MARKUP_SKIPPED = ['captcha', 'mcx_hp'];
 
     /**
+     * The Module Style values: full loads form-base.css and form-theme.css, base only the first,
+     * none neither of them.
+     *
+     * @var    string[]
+     * @since  1.1.0
+     */
+    private const STYLE_MODES = ['full', 'base', 'none'];
+
+    /**
+     * The Module Style of a new installation, and what an unknown value falls back to.
+     *
+     * @var    string
+     * @since  1.1.0
+     */
+    private const STYLE_DEFAULT = 'full';
+
+    /**
      * What went wrong in the extra field description, for the person allowed to fix it.
      *
      * Every entry holds two wordings: 'display' for the block above the form, translated and with
@@ -321,6 +338,22 @@ class MucronixContactHelper implements DatabaseAwareInterface
         $markup = (string) $params->get('markup', self::MARKUP_DEFAULT);
 
         return isset(self::MARKUP_CLASSES[$markup]) ? $markup : self::MARKUP_DEFAULT;
+    }
+
+    /**
+     * Returns the Module Style of the module instance: full, base or none.
+     *
+     * @param   Registry  $params  The module parameters.
+     *
+     * @return  string
+     *
+     * @since   1.1.0
+     */
+    public function getStyleMode(Registry $params): string
+    {
+        $mode = (string) $params->get('style_mode', self::STYLE_DEFAULT);
+
+        return \in_array($mode, self::STYLE_MODES, true) ? $mode : self::STYLE_DEFAULT;
     }
 
     /**

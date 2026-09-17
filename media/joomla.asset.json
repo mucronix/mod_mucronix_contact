@@ -19,7 +19,15 @@
     {
       "name": "mod_mucronix_contact.form",
       "type": "style",
-      "uri": "mod_mucronix_contact/form.css"
+      "uri": "mod_mucronix_contact/form-base.css"
+    },
+    {
+      "name": "mod_mucronix_contact.form-theme",
+      "type": "style",
+      "uri": "mod_mucronix_contact/form-theme.css",
+      "dependencies": [
+        "mod_mucronix_contact.form"
+      ]
     }
   ]
 }

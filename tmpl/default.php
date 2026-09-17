@@ -23,6 +23,7 @@ use Joomla\CMS\Uri\Uri;
  * @var   array|null                 $result       ['success' => bool, 'messages' => string[]] after a submission
  * @var   string[]                   $warnings     Notices about settings that keep the form from working
  * @var   string                     $buttonClass  Classes the Field Markup gives the send button
+ * @var   string                     $styleMode    Module Style: full, base or none
  */
 
 // Only someone who can fix them is told; visitors see the form as usual
@@ -57,13 +58,23 @@ $wa->getRegistry()->addExtensionRegistryFile('mod_mucronix_contact');
 $wa->useScript('mod_mucronix_contact.form');
 
 /*
- * The stylesheet only tidies the inside of the form and can be switched off whole, for a template
- * that dresses its forms itself. The uri in joomla.asset.json carries no css segment, the same way
- * the script carries no js one: with it Joomla looks for media/mod_mucronix_contact/css/css/form.css,
+ * Module Style. "Full" takes the layout and the look, "Basic" the layout alone - the stylesheet of
+ * 1.0.x - and "None" leaves the form to the template. The look depends on the layout in
+ * joomla.asset.json, so it can never arrive without it. The uris carry no css segment, the same way
+ * the script carries no js one: with it Joomla looks for media/mod_mucronix_contact/css/css/...,
  * finds nothing and drops the asset without a word - no error, no tag on the page.
  */
-if ($params->get('load_css', 1)) {
+if ($styleMode === 'full') {
+    $wa->useStyle('mod_mucronix_contact.form-theme');
+} elseif ($styleMode === 'base') {
     $wa->useStyle('mod_mucronix_contact.form');
+} else {
+    /*
+     * The second lock on the trap outlives the stylesheet it came from. The hidden attribute is the
+     * first, and this is the one left when a template resets [hidden]. The asset is named after its
+     * content, so two forms on one page print it once.
+     */
+    $wa->addInlineStyle('.mcx .mcx-hp { display: none; }');
 }
 
 Text::script('MOD_MUCRONIX_CONTACT_FORM_SENDING');

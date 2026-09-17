@@ -6,13 +6,21 @@
  */
 
 /*
+ * The layout of the form: spacing, widths, the consent line, errors and messages. Loaded by the
+ * Module Style "Full" and "Basic" alike, and "Basic" is exactly this file - the form.css of 1.0.x,
+ * rule for rule, so a site switched to it on update looks the way it did.
+ *
  * Every selector sits inside .mcx, so no other form on the site is touched, and nothing here uses
  * !important: a template that wants its own look has to be able to win without a fight.
  *
- * What this file does not do: card, background, border and shadow around the form. Those come from
- * the template, through the Wrapper Class parameter. Fonts and text sizes are the template's too.
+ * What this file does not do: borders of the fields, card, background, border and shadow around the
+ * form, the look of the button. With "Full" those come from form-theme.css, otherwise from the
+ * template, through the Wrapper Class parameter. Fonts and text sizes are the template's in any case.
  * Colours, the corner radius and the vertical spacing are variables, so one line in the site CSS
  * changes them all.
+ *
+ * The asset keeps the name it had in 1.0.x, mod_mucronix_contact.form: a layout override written for
+ * 1.0.x that asks for it by that name goes on getting its stylesheet.
  */
 
 .mcx {

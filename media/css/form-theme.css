@@ -1,0 +1,18 @@
+/**
+ * @package     mod_mucronix_contact
+ *
+ * @copyright   (C) 2026 Mucronix
+ * @license     GNU General Public License version 2 or later; see LICENSE
+ */
+
+/*
+ * The look of the form, loaded only with the Module Style "Full" and always after form-base.css,
+ * on which the asset depends. Everything the Appearance tab draws lives here and nowhere else: the
+ * borders of the fields, the frame, background and width of the form, the button of the module and
+ * the field in focus. "Basic" and "None" leave this file out, and with it every border but the red
+ * one of a field in error.
+ *
+ * The rules come with the parameters that drive them. A variable is not declared ahead of a rule
+ * that reads it: overriding one that nothing reads would change nothing, and the site owner would
+ * go looking for the fault on their own side.
+ */
