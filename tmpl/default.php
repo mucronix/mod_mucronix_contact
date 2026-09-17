@@ -20,8 +20,9 @@ use Joomla\CMS\Uri\Uri;
  * @var   \stdClass                  $module
  * @var   \Joomla\Registry\Registry  $params
  * @var   \Joomla\CMS\Form\Form      $form
- * @var   array|null                 $result    ['success' => bool, 'messages' => string[]] after a submission
- * @var   string[]                   $warnings  Notices about settings that keep the form from working
+ * @var   array|null                 $result       ['success' => bool, 'messages' => string[]] after a submission
+ * @var   string[]                   $warnings     Notices about settings that keep the form from working
+ * @var   string                     $buttonClass  Classes the Field Markup gives the send button
  */
 
 // Only someone who can fix them is told; visitors see the form as usual
@@ -35,7 +36,9 @@ $submitText = $submitText !== '' ? $submitText : Text::_('MOD_MUCRONIX_CONTACT_F
 
 $wrapperClass = trim('mcx ' . $params->get('wrapper_class', ''));
 $formClass    = trim('mcx-form ' . $params->get('form_class', ''));
-$submitClass  = trim('mcx-submit ' . $params->get('submit_class', ''));
+
+// The Button Class parameter goes after the classes of the Field Markup: it adds, it does not replace
+$submitClass  = trim('mcx-submit ' . trim($buttonClass . ' ' . $params->get('submit_class', '')));
 
 /*
  * The box around one field, and the honeypot is deliberately not one of them: it is hidden by the

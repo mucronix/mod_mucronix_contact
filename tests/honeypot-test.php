@@ -21,13 +21,14 @@
  *
  * The extra field cases need this in the Extra Fields tab, and skip themselves without it:
  *
- *   <field name="mcx_test_topic" type="text" label="Test topic" />
+ *   <field name="mcx_test_topic" type="text" label="Test topic" class="mcx-owner-probe" />
  *   <field name="captcha" type="text" label="Refused name" />
  *   <field name="mcx_test_sql" type="sql" label="Refused type" query="SELECT 1" />
  *
  * The first has to be accepted, the second and third refused. All three are written as one block
  * on purpose: the presence of the first proves the block was pasted, so the absence of the other
- * two means they were refused rather than never configured.
+ * two means they were refused rather than never configured. The class on the first is there for the
+ * Field Markup case: a class the site owner wrote into an extra field has to survive the markup.
  *
  * Seven real messages are sent per run, one per sending case, and two more with --success-page.
  *
@@ -42,13 +43,17 @@
  *
  * Usage:
  *   php tests/honeypot-test.php [--url=http://joomla6/] [--page=/] [--log=<path>] [--slow] [--telegram]
- *                              [--success-page]
+ *                              [--success-page] [--markup=joomla|uikit|none [--markup-only]]
  *
  * --slow adds the expired captcha case, which idles about five minutes.
  *
  * --success-page adds the two thank-you page cases, and says so for the same reason as --telegram:
  * a page that was never chosen and a page that stopped being answered look alike from here, so the
  * setting is asserted on the command line rather than guessed. Choose one in the Basic tab first.
+ *
+ * --markup adds the Field Markup case, and names the variant set on the Appearance tab: the page cannot
+ * tell a variant from the same classes typed into Button Class. With --markup-only that case runs alone
+ * and nothing is sent, so all three variants can be checked one after another.
  *
  * --telegram adds the case for sending to Telegram, and says so because nothing in the page shows
  * whether it is switched on. The case asks one thing: with Telegram on, the message still goes out.
@@ -59,10 +64,22 @@
  * Exit code 0 when every case behaves as it should, 1 otherwise.
  */
 
-$options     = getopt('', ['url::', 'page::', 'log::', 'slow', 'telegram', 'success-page']);
+$options     = getopt('', ['url::', 'page::', 'log::', 'slow', 'telegram', 'success-page', 'markup:', 'markup-only']);
 $slow        = isset($options['slow']);
 $telegram    = isset($options['telegram']);
 $successPage = isset($options['success-page']);
+$markup      = $options['markup'] ?? null;
+$markupOnly  = isset($options['markup-only']);
+
+if ($markup !== null && !in_array($markup, ['joomla', 'uikit', 'none'], true)) {
+    fwrite(STDERR, "--markup takes joomla, uikit or none\n");
+    exit(1);
+}
+
+if ($markupOnly && $markup === null) {
+    fwrite(STDERR, "--markup-only needs --markup=joomla|uikit|none: the page cannot say which one was chosen\n");
+    exit(1);
+}
 $baseUrl = rtrim($options['url'] ?? 'http://joomla6/', '/') . '/';
 $page    = $options['page'] ?? '/';
 $logFile = $options['log'] ?? 'administrator/logs/mod_mucronix_contact.php';
@@ -969,6 +986,205 @@ function fieldClassCase(string $title, string $baseUrl, string $page): ?bool
 }
 
 /**
+ * What each Field Markup has to add, written out here rather than read from the helper: a case that
+ * takes its expectation from the code it checks agrees with any mistake in that code.
+ */
+const MARKUP_EXPECTED = [
+    'joomla' => [
+        'button' => ['btn', 'btn-primary'],
+    ],
+    'uikit'  => [
+        'input'    => ['uk-input'],
+        'textarea' => ['uk-textarea'],
+        'select'   => ['uk-select'],
+        'checkbox' => ['uk-checkbox'],
+        'label'    => ['uk-form-label'],
+        'button'   => ['uk-button', 'uk-button-primary'],
+    ],
+    'none'   => [],
+];
+
+/**
+ * The classes the core layouts print themselves, which no variant may take away.
+ */
+const MARKUP_CORE = [
+    'input'      => ['form-control'],
+    'textarea'   => ['form-control'],
+    'select'     => ['form-select'],
+    'checkbox'   => ['form-check-input'],
+    'checkboxes' => ['form-check-input'],
+    'radio'      => ['form-check-input'],
+];
+
+/**
+ * The class the extra test field carries in its own description, to prove it is kept.
+ */
+const MARKUP_OWNER_PROBE = 'mcx-owner-probe';
+
+/**
+ * The Field Markup, read from the markup of the page.
+ *
+ * Every input, label and the send button has to carry the classes of the variant that was chosen and
+ * no framework class of another: uk-* anywhere outside UIkit, btn and btn-primary on the button
+ * outside Joomla. The core classes stay in all three. The captcha is the plugin's and is not looked
+ * at, the trap must carry no framework class at all, and radio buttons and checkbox lists take
+ * nothing beyond the core.
+ *
+ * Which variant was chosen is not visible from the page, so it is asserted with --markup rather than
+ * guessed from the button: Button Class may add the same classes by hand.
+ */
+function markupCase(string $title, string $markup, string $baseUrl, string $page): bool
+{
+    $form = readForm(request($baseUrl . ltrim($page, '/'), newJar()));
+    $id   = $form['moduleId'];
+
+    $document = new DOMDocument();
+    libxml_use_internal_errors(true);
+    $document->loadHTML('<?xml encoding="UTF-8">' . $form['html']);
+    libxml_clear_errors();
+
+    $xpath = new DOMXPath($document);
+    $root  = $xpath->query('//form[@id="mcx-form-' . $id . '"]')->item(0);
+
+    if (!$root instanceof DOMElement) {
+        report($title, 'no form', $markup, 0, false, false);
+
+        return false;
+    }
+
+    $expected  = MARKUP_EXPECTED[$markup];
+    $classesOf = static fn (DOMElement $node): array
+        => preg_split('/\s+/', trim($node->getAttribute('class')), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+    $wrong     = [];
+    $seen      = [];
+
+    // A framework class not belonging to the variant: every uk-* outside UIkit, btn* outside Joomla
+    $foreign = static function (array $classes, array $allowed): array {
+        return array_values(array_filter(
+            $classes,
+            static fn (string $class): bool => !in_array($class, $allowed, true)
+                && (str_starts_with($class, 'uk-') || in_array($class, ['btn', 'btn-primary'], true))
+        ));
+    };
+
+    $judge = static function (string $what, string $kind, array $classes, array $want) use (&$wrong, $foreign): void {
+        foreach (array_diff($want, $classes) as $missing) {
+            $wrong[] = $what . ': no "' . $missing . '"';
+        }
+
+        foreach (array_diff(MARKUP_CORE[$kind] ?? [], $classes) as $missing) {
+            $wrong[] = $what . ': the core class "' . $missing . '" is gone';
+        }
+
+        foreach ($foreign($classes, $want) as $extra) {
+            $wrong[] = $what . ': "' . $extra . '" does not belong to this markup';
+        }
+    };
+
+    $controls = $xpath->query('.//input | .//textarea | .//select', $root);
+
+    foreach ($controls as $control) {
+        if (!preg_match('/^mcx_' . $id . '\[([^\]]+)\](\[\])?$/', $control->getAttribute('name'), $m)) {
+            continue;
+        }
+
+        $name = $m[1];
+        $type = strtolower($control->getAttribute('type'));
+
+        if ($name === 'captcha' || $type === 'hidden') {
+            continue;
+        }
+
+        $kind = match (true) {
+            $control->tagName !== 'input' => $control->tagName,
+            $type === 'radio'             => 'radio',
+            $type === 'checkbox'          => isset($m[2]) ? 'checkboxes' : 'checkbox',
+            default                       => 'input',
+        };
+
+        $classes = $classesOf($control);
+
+        if ($name === 'mcx_hp') {
+            foreach ($foreign($classes, []) as $extra) {
+                $wrong[] = 'the trap carries "' . $extra . '": a framework class can put it back on the page';
+            }
+
+            $seen['trap'] = ($seen['trap'] ?? 0) + 1;
+
+            continue;
+        }
+
+        $judge('field "' . $name . '" (' . $kind . ')', $kind, $classes, $expected[$kind] ?? []);
+        $seen[$kind] = ($seen[$kind] ?? 0) + 1;
+
+        if ($name === 'mcx_test_topic' && !in_array(MARKUP_OWNER_PROBE, $classes, true)) {
+            $wrong[] = 'field "mcx_test_topic" has no "' . MARKUP_OWNER_PROBE . '": either the class of the extra field'
+                . ' was overwritten, or its description predates 1.1.0 - see the block at the top of this script';
+        }
+    }
+
+    foreach ($xpath->query('.//label[substring(@id, string-length(@id) - 3) = "-lbl"]', $root) as $label) {
+        $name    = substr($label->getAttribute('for'), strlen('mcx_' . $id . '_'));
+        $classes = $classesOf($label);
+
+        if ($name === 'captcha') {
+            continue;
+        }
+
+        if ($name === 'mcx_hp') {
+            foreach ($foreign($classes, []) as $extra) {
+                $wrong[] = 'the label of the trap carries "' . $extra . '"';
+            }
+
+            continue;
+        }
+
+        $judge('label of "' . $name . '"', 'label', $classes, $expected['label'] ?? []);
+        $seen['label'] = ($seen['label'] ?? 0) + 1;
+    }
+
+    $button = $xpath->query('.//button[contains(concat(" ", normalize-space(@class), " "), " mcx-submit ")]', $root)->item(0);
+
+    if ($button instanceof DOMElement) {
+        $judge('the send button', 'button', $classesOf($button), $expected['button'] ?? []);
+        $seen['button'] = 1;
+    } else {
+        $wrong[] = 'no .mcx-submit button in the form';
+    }
+
+    if (!isset($seen['trap'])) {
+        $wrong[] = 'no trap input in the form, so its classes could not be checked';
+    }
+
+    $ok = $wrong === [];
+
+    report($title, $ok ? $markup : 'wrong', $markup, 0, false, $ok);
+
+    foreach ($wrong as $line) {
+        echo '  ', $line, "\n";
+    }
+
+    // Said aloud: a type missing from the page was not checked, however green the line above is
+    $counted = [];
+
+    foreach (['input', 'textarea', 'select', 'checkbox', 'checkboxes', 'radio', 'label', 'button'] as $kind) {
+        if (isset($seen[$kind])) {
+            $counted[] = $kind . ' ' . $seen[$kind];
+        }
+    }
+
+    $absent = array_diff(['input', 'textarea', 'select', 'checkbox', 'checkboxes', 'radio'], array_keys($seen));
+
+    echo '  checked: ', implode(', ', $counted), "\n";
+
+    if ($absent !== []) {
+        echo '  not on the page, so not checked: ', implode(', ', $absent), "\n";
+    }
+
+    return $ok;
+}
+
+/**
  * A submission without JavaScript while a thank-you page is set.
  *
  * The answer to the post has to be a 303 pointing at that page rather than back at the form, and
@@ -1259,6 +1475,22 @@ echo "target: ", $baseUrl, ltrim($page, '/'), "\nlog:    $logFile\n";
 echo "requires \"Log Sent Messages\" to be on in the module settings, Advanced tab.\n\n";
 
 /*
+ * The Field Markup alone sends nothing, so it can be run once per variant without a full round of
+ * messages each time: switch the setting, run with --markup-only.
+ */
+if ($markupOnly) {
+    $ok = markupCase('markup: ' . $markup . ' classes on every field', $markup, $baseUrl, $page);
+
+    foreach ($jars as $jar) {
+        @unlink($jar);
+    }
+
+    echo "\n", $ok ? "OK: every case behaves as it should\n" : "FAILED: 1 of 1\n";
+
+    exit($ok ? 0 : 1);
+}
+
+/*
  * Before anything is sent: a required field the script cannot fill would refuse every
  * submission, and the run would be a spread of reds with the cause named in none of them.
  */
@@ -1318,7 +1550,7 @@ $probe = readForm(request($baseUrl . ltrim($page, '/'), newJar()));
 
 if (!hasField($probe, 'mcx_test_topic')) {
     echo "\nskipped: the extra field cases. Paste this into the Extra Fields tab of the module:\n";
-    echo "    <field name=\"mcx_test_topic\" type=\"text\" label=\"Test topic\" />\n";
+    echo "    <field name=\"mcx_test_topic\" type=\"text\" label=\"Test topic\" class=\"mcx-owner-probe\" />\n";
     echo "    <field name=\"captcha\" type=\"text\" label=\"Refused name\" />\n";
     echo "    <field name=\"mcx_test_sql\" type=\"sql\" label=\"Refused type\" query=\"SELECT 1\" />\n";
 } else {
@@ -1381,6 +1613,14 @@ $fieldClassVerdict = fieldClassCase('fields: class parameter on every wrapper', 
 if ($fieldClassVerdict !== null) {
     $total++;
     $failures += $fieldClassVerdict ? 0 : 1;
+}
+
+// The Field Markup, only with --markup: the page does not say which variant was chosen
+if ($markup !== null) {
+    $total++;
+    $failures += markupCase('markup: ' . $markup . ' classes on every field', $markup, $baseUrl, $page) ? 0 : 1;
+} else {
+    echo "\nskipped: the Field Markup case. Pass --markup=joomla|uikit|none, the value set on the Appearance tab.\n";
 }
 
 /*

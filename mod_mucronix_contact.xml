@@ -347,6 +347,21 @@
 			</fieldset>
 
 			<fieldset name="appearance" label="MOD_MUCRONIX_CONTACT_FIELDSET_APPEARANCE_LABEL">
+				<!-- Classes are added to what the core layouts print, never taken away. The table
+				     of classes lives in the helper, MARKUP_CLASSES. -->
+				<field
+					name="markup"
+					type="list"
+					label="MOD_MUCRONIX_CONTACT_FIELD_MARKUP_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_MARKUP_DESC"
+					default="joomla"
+					validate="options"
+					>
+					<option value="joomla">MOD_MUCRONIX_CONTACT_FIELD_MARKUP_JOOMLA</option>
+					<option value="uikit">MOD_MUCRONIX_CONTACT_FIELD_MARKUP_UIKIT</option>
+					<option value="none">MOD_MUCRONIX_CONTACT_FIELD_MARKUP_NONE</option>
+				</field>
+
 				<field
 					name="load_css"
 					type="radio"

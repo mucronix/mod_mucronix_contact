@@ -43,6 +43,7 @@ class Dispatcher extends AbstractModuleDispatcher implements HelperFactoryAwareI
         $data['form']           = $helper->getForm($data['params'], $this->module);
         $data['result']         = $helper->handleSubmission($data['form'], $data['params'], $this->module, $this->getApplication());
         $data['warnings']       = $helper->getAdminWarnings($data['params'], $this->getApplication());
+        $data['buttonClass']    = $helper->getButtonClass($data['params']);
 
         return $data;
     }

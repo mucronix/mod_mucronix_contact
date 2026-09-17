@@ -93,6 +93,77 @@ class MucronixContactHelper implements DatabaseAwareInterface
     private const EXTRA_NAME_PATTERN = '/^[a-zA-Z][a-zA-Z0-9_]*$/';
 
     /**
+     * Classes each Field Markup adds to the ones the core layouts print themselves, by the element a
+     * field turns into on the page. Nothing here is ever taken away: form-control, form-select and
+     * form-check-input stay in every variant, because only copies of the core layouts could remove
+     * them, and every copy has to be compared with the original on each Joomla update.
+     *
+     * Radio buttons and checkbox lists get nothing. The radio layout writes form-check-input into the
+     * input itself and hands a class of the field to the label instead, and a checkbox list takes its
+     * input class from every single option: neither is reachable without a copy or without rewriting
+     * options, which this simple form does not do for two types of extra field.
+     *
+     * The field wrapper is not on the list in any variant. Spacing classes such as mb-3 or uk-margin
+     * would bring back the two margins that --mcx-gap exists to replace; the Field Class parameter is
+     * there for a site owner who wants them anyway.
+     *
+     * @var    array<string, array<string, string>>
+     * @since  1.1.0
+     */
+    private const MARKUP_CLASSES = [
+        'joomla' => [
+            'button' => 'btn btn-primary',
+        ],
+        'uikit'  => [
+            'input'    => 'uk-input',
+            'textarea' => 'uk-textarea',
+            'select'   => 'uk-select',
+            'checkbox' => 'uk-checkbox',
+            'label'    => 'uk-form-label',
+            'button'   => 'uk-button uk-button-primary',
+        ],
+        'none'   => [],
+    ];
+
+    /**
+     * The Field Markup of a new installation, and what an unknown value falls back to.
+     *
+     * @var    string
+     * @since  1.1.0
+     */
+    private const MARKUP_DEFAULT = 'joomla';
+
+    /**
+     * The element each field type turns into, for MARKUP_CLASSES. A type missing here takes no class
+     * on its input: radio and checkboxes on purpose, see above.
+     *
+     * @var    array<string, string>
+     * @since  1.1.0
+     */
+    private const MARKUP_ELEMENTS = [
+        'text'     => 'input',
+        'email'    => 'input',
+        'tel'      => 'input',
+        'url'      => 'input',
+        'number'   => 'input',
+        'calendar' => 'input',
+        'file'     => 'input',
+        'textarea' => 'textarea',
+        'list'     => 'select',
+        'checkbox' => 'checkbox',
+    ];
+
+    /**
+     * Fields that take no class of the markup at all, label included. The captcha is drawn by its
+     * plugin, which receives the class of the field and would put it wherever it likes. The trap is
+     * hidden by the markup, and a framework class carrying a display of its own could show it.
+     *
+     * @var    string[]
+     * @since  1.1.0
+     */
+    private const MARKUP_SKIPPED = ['captcha', 'mcx_hp'];
+
+    /**
      * What went wrong in the extra field description, for the person allowed to fix it.
      *
      * Every entry holds two wordings: 'display' for the block above the form, translated and with
@@ -230,7 +301,95 @@ class MucronixContactHelper implements DatabaseAwareInterface
             $form->removeField('consent');
         }
 
+        // Last, once the fields that are not shown are gone and the extra ones are in
+        $this->applyMarkup($form, $params);
+
         return $form;
+    }
+
+    /**
+     * Returns the Field Markup of the module instance: joomla, uikit or none.
+     *
+     * @param   Registry  $params  The module parameters.
+     *
+     * @return  string
+     *
+     * @since   1.1.0
+     */
+    public function getMarkup(Registry $params): string
+    {
+        $markup = (string) $params->get('markup', self::MARKUP_DEFAULT);
+
+        return isset(self::MARKUP_CLASSES[$markup]) ? $markup : self::MARKUP_DEFAULT;
+    }
+
+    /**
+     * Returns the classes the Field Markup gives the send button, empty for none.
+     *
+     * @param   Registry  $params  The module parameters.
+     *
+     * @return  string
+     *
+     * @since   1.1.0
+     */
+    public function getButtonClass(Registry $params): string
+    {
+        return self::MARKUP_CLASSES[$this->getMarkup($params)]['button'] ?? '';
+    }
+
+    /**
+     * Adds the classes of the Field Markup to the inputs and labels of the form.
+     *
+     * Written into the form definition before any field object exists, the same way the attachment
+     * gets its layout: FormField::setup() reads class and labelclass from there and appends required
+     * on its own. A class an extra field already carries in its description is kept, ours goes after it.
+     *
+     * @param   Form      $form    The form, with every field that is going to be shown.
+     * @param   Registry  $params  The module parameters.
+     *
+     * @return  void
+     *
+     * @since   1.1.0
+     */
+    private function applyMarkup(Form $form, Registry $params): void
+    {
+        $classes = self::MARKUP_CLASSES[$this->getMarkup($params)];
+
+        foreach ($form->getXml()->xpath('//fieldset[@name="contact"]/field') as $element) {
+            $name = (string) $element['name'];
+            $type = strtolower((string) $element['type']) ?: 'text';
+
+            if (\in_array($name, self::MARKUP_SKIPPED, true) || $type === 'captcha') {
+                continue;
+            }
+
+            $target = self::MARKUP_ELEMENTS[$type] ?? '';
+
+            if (isset($classes[$target])) {
+                $form->setFieldAttribute($name, 'class', $this->addClasses((string) $element['class'], $classes[$target]));
+            }
+
+            if (isset($classes['label'])) {
+                $form->setFieldAttribute($name, 'labelclass', $this->addClasses((string) $element['labelclass'], $classes['label']));
+            }
+        }
+    }
+
+    /**
+     * Appends classes to a class list, leaving out the ones already in it.
+     *
+     * @param   string  $list  The classes there are.
+     * @param   string  $add   The classes to add.
+     *
+     * @return  string
+     *
+     * @since   1.1.0
+     */
+    private function addClasses(string $list, string $add): string
+    {
+        $classes = preg_split('/\s+/', trim($list . ' ' . $add), -1, \PREG_SPLIT_NO_EMPTY) ?: [];
+
+        return implode(' ', array_unique($classes));
     }
 
     /**
