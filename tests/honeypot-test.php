@@ -1208,6 +1208,8 @@ function markupCase(string $title, string $markup, string $baseUrl, string $page
  * this one checks the second lock, which lives in form-base.css while that is linked and has to be
  * printed inline when it is not. With the file linked, its content is fetched and read: a link to a
  * stylesheet that lost the rule would look the same from the page.
+ *
+ * The look parameters are judged here too, by lookOnPage(): they exist only in "Full".
  */
 function styleCase(string $title, string $style, string $baseUrl, string $page): bool
 {
@@ -1255,6 +1257,8 @@ function styleCase(string $title, string $style, string $baseUrl, string $page):
         }
     }
 
+    [$modifiers, $variables] = lookOnPage($form, $style, $wrong);
+
     $ok = $wrong === [];
 
     report($title, $ok ? $style : 'wrong', $style, 0, false, $ok);
@@ -1266,9 +1270,105 @@ function styleCase(string $title, string $style, string $baseUrl, string $page):
     if ($ok) {
         echo '  linked: ', $order ? implode(', ', $order) : 'nothing', '; the trap locked by ',
             in_array('form-base', $order, true) ? 'form-base.css' : 'an inline style', "\n";
+        echo '  modifiers: ', $modifiers ? implode(' ', $modifiers) : 'none',
+            '; variables: ', $variables ? implode(' ', $variables) : 'none printed', "\n";
     }
 
     return $ok;
+}
+
+/**
+ * The look parameters as they reach the page: the modifiers on the wrapper and the rule with the
+ * variables of the instance in the head.
+ *
+ * Which values were chosen is not visible from here, so what is judged is what holds for any of
+ * them. Outside "Full" there is neither a modifier nor a rule. In "Full" there is exactly one field
+ * look modifier; the rule, when there is one, names only the six known variables, each in the form
+ * the helper builds and none equal to its default - a default printed on the id would override a
+ * variable the site owner set on .mcx in the template CSS. It comes after form-theme.css.
+ *
+ * With nothing changed on the Appearance tab no rule is printed, and the line says so: that part
+ * is only really tried once a value has been changed.
+ *
+ * @return  array{0: string[], 1: string[]}  The modifiers and the variables found.
+ */
+function lookOnPage(array $form, string $style, array &$wrong): array
+{
+    $html = $form['html'];
+    $id   = $form['moduleId'];
+
+    $modifiers = [];
+
+    if (preg_match('/<div id="mcx-' . $id . '" class="([^"]*)"/', $html, $wrapper)) {
+        $modifiers = array_values(preg_grep('/^mcx--/', preg_split('/\s+/', trim($wrapper[1]))));
+    } else {
+        $wrong[] = 'no wrapper with id mcx-' . $id . ' on the page';
+    }
+
+    $rules     = preg_match_all('/<style\b[^>]*>\s*#mcx-' . $id . '\s*\{([^}]*)\}\s*<\/style>/', $html, $found, PREG_OFFSET_CAPTURE);
+    $variables = [];
+
+    if ($style !== 'full') {
+        if ($modifiers !== []) {
+            $wrong[] = 'modifiers on the wrapper outside "Full": ' . implode(' ', $modifiers);
+        }
+
+        if ($rules > 0) {
+            $wrong[] = 'a rule with variables for #mcx-' . $id . ' is printed outside "Full"';
+        }
+
+        return [$modifiers, $variables];
+    }
+
+    $looks = preg_grep('/^mcx--fields-(box|line|theme)$/', $modifiers);
+
+    if (count($looks) !== 1) {
+        $wrong[] = 'expected exactly one of mcx--fields-box, -line, -theme on the wrapper, found: '
+            . ($modifiers ? implode(' ', $modifiers) : 'none');
+    }
+
+    foreach (array_diff($modifiers, ['mcx--fields-box', 'mcx--fields-line', 'mcx--fields-theme', 'mcx--form-framed', 'mcx--button-own']) as $unknown) {
+        $wrong[] = 'unknown modifier on the wrapper: ' . $unknown;
+    }
+
+    if ($rules > 1) {
+        $wrong[] = 'the rule with variables for #mcx-' . $id . ' is printed ' . $rules . ' times';
+    }
+
+    if ($rules === 0) {
+        return [$modifiers, $variables];
+    }
+
+    // What each variable may hold and the default it must never be printed with
+    $known = [
+        '--mcx-field-border' => ['/^#[0-9a-f]{6}$/', '#dddddd'],
+        '--mcx-field-radius' => ['/^([0-9]|[12][0-9]|30)px$/', '4px'],
+        '--mcx-gap'          => ['/^([0-9]|[1-3][0-9]|40)px$/', '12px'],
+        '--mcx-form-bg'      => ['/^#[0-9a-f]{6}$/', ''],
+        '--mcx-form-max'     => ['/^([3-9][0-9]{2}|1[01][0-9]{2}|1200)px$/', '0px'],
+        '--mcx-accent'       => ['/^#[0-9a-f]{6}$/', '#2f6fbf'],
+    ];
+
+    foreach (array_filter(array_map('trim', explode(';', $found[1][0][0]))) as $declaration) {
+        [$name, $value] = array_map('trim', explode(':', $declaration, 2) + [1 => '']);
+        $variables[]    = $name . ': ' . $value;
+
+        if (!isset($known[$name])) {
+            $wrong[] = 'unknown variable in the rule: ' . $name;
+        } elseif (!preg_match($known[$name][0], $value)) {
+            $wrong[] = $name . ' holds "' . $value . '", which the helper never builds';
+        } elseif ($value === $known[$name][1]) {
+            $wrong[] = $name . ' is printed with its default ' . $value . ': it would override .mcx in the template CSS';
+        }
+    }
+
+    $theme = preg_match('/<link\b[^>]*mod_mucronix_contact\/css\/form-theme(?:\.min)?\.css/', $html, $link, PREG_OFFSET_CAPTURE);
+
+    if ($theme && $found[0][0][1] < $link[0][1]) {
+        $wrong[] = 'the rule with variables comes before form-theme.css';
+    }
+
+    return [$modifiers, $variables];
 }
 
 /**

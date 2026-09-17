@@ -377,6 +377,150 @@
 					<option value="none">MOD_MUCRONIX_CONTACT_FIELD_STYLE_MODE_NONE</option>
 				</field>
 
+				<!-- The look parameters. They mean something only with form-theme.css, which only "Full"
+				     loads, so every one of them is hidden otherwise. The defaults are repeated in the
+				     helper, LOOK_DEFAULTS: a value equal to its default prints no variable. -->
+				<field
+					name="appearance_fields_note"
+					type="note"
+					label="MOD_MUCRONIX_CONTACT_APPEARANCE_GROUP_FIELDS"
+					heading="h4"
+					showon="style_mode:full"
+				/>
+
+				<field
+					name="field_look"
+					type="list"
+					label="MOD_MUCRONIX_CONTACT_FIELD_FIELD_LOOK_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_FIELD_LOOK_DESC"
+					default="box"
+					validate="options"
+					showon="style_mode:full"
+					>
+					<option value="box">MOD_MUCRONIX_CONTACT_FIELD_FIELD_LOOK_BOX</option>
+					<option value="line">MOD_MUCRONIX_CONTACT_FIELD_FIELD_LOOK_LINE</option>
+					<option value="theme">MOD_MUCRONIX_CONTACT_FIELD_FIELD_LOOK_THEME</option>
+				</field>
+
+				<field
+					name="field_border"
+					type="color"
+					label="MOD_MUCRONIX_CONTACT_FIELD_FIELD_BORDER_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_FIELD_BORDER_DESC"
+					default="#dddddd"
+					validate="color"
+					showon="style_mode:full[AND]field_look!:theme"
+				/>
+
+				<field
+					name="field_radius"
+					type="number"
+					label="MOD_MUCRONIX_CONTACT_FIELD_FIELD_RADIUS_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_FIELD_RADIUS_DESC"
+					default="4"
+					min="0"
+					max="30"
+					filter="integer"
+					showon="style_mode:full[AND]field_look!:theme"
+				/>
+
+				<field
+					name="field_gap"
+					type="number"
+					label="MOD_MUCRONIX_CONTACT_FIELD_FIELD_GAP_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_FIELD_GAP_DESC"
+					default="12"
+					min="0"
+					max="40"
+					filter="integer"
+					showon="style_mode:full"
+				/>
+
+				<field
+					name="appearance_form_note"
+					type="note"
+					label="MOD_MUCRONIX_CONTACT_APPEARANCE_GROUP_FORM"
+					heading="h4"
+					showon="style_mode:full"
+				/>
+
+				<field
+					name="form_frame"
+					type="radio"
+					layout="joomla.form.field.radio.switcher"
+					label="MOD_MUCRONIX_CONTACT_FIELD_FORM_FRAME_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_FORM_FRAME_DESC"
+					default="0"
+					filter="integer"
+					showon="style_mode:full"
+					>
+					<option value="0">JNO</option>
+					<option value="1">JYES</option>
+				</field>
+
+				<!-- Empty means transparent. No validate="color" here: the core layout shows an empty
+				     colour as "none", and a colour rule would refuse to save it. The helper takes
+				     anything that is not #rgb or #rrggbb for empty. -->
+				<field
+					name="form_bg"
+					type="color"
+					label="MOD_MUCRONIX_CONTACT_FIELD_FORM_BG_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_FORM_BG_DESC"
+					default=""
+					filter="string"
+					showon="style_mode:full"
+				/>
+
+				<field
+					name="form_max"
+					type="number"
+					label="MOD_MUCRONIX_CONTACT_FIELD_FORM_MAX_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_FORM_MAX_DESC"
+					default="0"
+					min="0"
+					max="1200"
+					filter="integer"
+					showon="style_mode:full"
+				/>
+
+				<field
+					name="appearance_button_note"
+					type="note"
+					label="MOD_MUCRONIX_CONTACT_APPEARANCE_GROUP_BUTTON"
+					heading="h4"
+					showon="style_mode:full"
+				/>
+
+				<field
+					name="button_look"
+					type="list"
+					label="MOD_MUCRONIX_CONTACT_FIELD_BUTTON_LOOK_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_BUTTON_LOOK_DESC"
+					default="theme"
+					validate="options"
+					showon="style_mode:full"
+					>
+					<option value="theme">MOD_MUCRONIX_CONTACT_FIELD_BUTTON_LOOK_THEME</option>
+					<option value="own">MOD_MUCRONIX_CONTACT_FIELD_BUTTON_LOOK_OWN</option>
+				</field>
+
+				<field
+					name="accent"
+					type="color"
+					label="MOD_MUCRONIX_CONTACT_FIELD_ACCENT_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_ACCENT_DESC"
+					default="#2f6fbf"
+					validate="color"
+					showon="style_mode:full"
+				/>
+
+				<field
+					name="appearance_more_note"
+					type="note"
+					label="MOD_MUCRONIX_CONTACT_APPEARANCE_GROUP_MORE"
+					heading="h4"
+				/>
+
 				<field
 					name="wrapper_class"
 					type="text"

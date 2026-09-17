@@ -181,6 +181,25 @@ class MucronixContactHelper implements DatabaseAwareInterface
     private const STYLE_DEFAULT = 'full';
 
     /**
+     * The look parameters of the Appearance tab with their defaults, the same as in the manifest.
+     * A value equal to its default prints nothing: see getStyleVariables().
+     *
+     * @var    array<string, string|integer>
+     * @since  1.1.0
+     */
+    private const LOOK_DEFAULTS = [
+        'field_look'   => 'box',
+        'field_border' => '#dddddd',
+        'field_radius' => 4,
+        'field_gap'    => 12,
+        'form_frame'   => 0,
+        'form_bg'      => '',
+        'form_max'     => 0,
+        'button_look'  => 'theme',
+        'accent'       => '#2f6fbf',
+    ];
+
+    /**
      * What went wrong in the extra field description, for the person allowed to fix it.
      *
      * Every entry holds two wordings: 'display' for the block above the form, translated and with
@@ -367,7 +386,167 @@ class MucronixContactHelper implements DatabaseAwareInterface
      */
     public function getButtonClass(Registry $params): string
     {
+        /*
+         * The button of the module replaces the template's, so it takes no framework class. Kept,
+         * btn-primary or uk-button-primary would bring their own background, hover and focus, each
+         * fighting the accent colour on a weight this stylesheet is not meant to reach.
+         */
+        if ($this->getStyleMode($params) === 'full' && $this->getLookChoice($params, 'button_look', ['theme', 'own']) === 'own') {
+            return '';
+        }
+
         return self::MARKUP_CLASSES[$this->getMarkup($params)]['button'] ?? '';
+    }
+
+    /**
+     * Returns the modifier classes of the root wrapper that switch the rules of form-theme.css on.
+     * Empty unless the Module Style is full: without form-theme.css they would mean nothing.
+     *
+     * @param   Registry  $params  The module parameters.
+     *
+     * @return  string
+     *
+     * @since   1.1.0
+     */
+    public function getStyleModifiers(Registry $params): string
+    {
+        if ($this->getStyleMode($params) !== 'full') {
+            return '';
+        }
+
+        $classes = ['mcx--fields-' . $this->getLookChoice($params, 'field_look', ['box', 'line', 'theme'])];
+
+        if ($this->getLookChoice($params, 'form_frame', ['0', '1']) === '1') {
+            $classes[] = 'mcx--form-framed';
+        }
+
+        if ($this->getLookChoice($params, 'button_look', ['theme', 'own']) === 'own') {
+            $classes[] = 'mcx--button-own';
+        }
+
+        return implode(' ', $classes);
+    }
+
+    /**
+     * Returns the rule with the variables of one module instance, for an inline style, or an empty
+     * string when there is nothing to print.
+     *
+     * Only values that differ from their defaults are printed. The rule is keyed to the id of the
+     * instance, and an id outweighs any class: printed always, it would silently override a variable
+     * the site owner set on .mcx in the template CSS back in 1.0.x, although nobody touched the
+     * parameter. A value that does not pass the check counts as the default, so it prints nothing
+     * either, and nothing is logged: the parameter is the owner's, and the page is still right.
+     *
+     * @param   Registry  $params    The module parameters.
+     * @param   integer   $moduleId  The id of the module instance.
+     *
+     * @return  string
+     *
+     * @since   1.1.0
+     */
+    public function getStyleVariables(Registry $params, int $moduleId): string
+    {
+        if ($this->getStyleMode($params) !== 'full') {
+            return '';
+        }
+
+        $border = $this->getLookColour($params, 'field_border');
+        $radius = $this->getLookNumber($params, 'field_radius', 0, 30);
+        $gap    = $this->getLookNumber($params, 'field_gap', 0, 40);
+        $bg     = $this->getLookColour($params, 'form_bg');
+        $max    = $this->getLookNumber($params, 'form_max', 300, 1200);
+        $accent = $this->getLookColour($params, 'accent');
+
+        $variables = array_filter([
+            '--mcx-field-border' => $border !== self::LOOK_DEFAULTS['field_border'] ? $border : '',
+            '--mcx-field-radius' => $radius !== self::LOOK_DEFAULTS['field_radius'] ? $radius . 'px' : '',
+            '--mcx-gap'          => $gap !== self::LOOK_DEFAULTS['field_gap'] ? $gap . 'px' : '',
+            '--mcx-form-bg'      => $bg,
+            '--mcx-form-max'     => $max !== self::LOOK_DEFAULTS['form_max'] ? $max . 'px' : '',
+            '--mcx-accent'       => $accent !== self::LOOK_DEFAULTS['accent'] ? $accent : '',
+        ], static fn (string $value): bool => $value !== '');
+
+        if ($variables === []) {
+            return '';
+        }
+
+        $declarations = [];
+
+        foreach ($variables as $name => $value) {
+            $declarations[] = $name . ': ' . $value . ';';
+        }
+
+        return '#mcx-' . $moduleId . ' { ' . implode(' ', $declarations) . ' }';
+    }
+
+    /**
+     * Reads a look parameter that takes one of a few values; anything else is the default.
+     *
+     * @param   Registry  $params   The module parameters.
+     * @param   string    $name     The parameter.
+     * @param   string[]  $allowed  The values it may take.
+     *
+     * @return  string
+     *
+     * @since   1.1.0
+     */
+    private function getLookChoice(Registry $params, string $name, array $allowed): string
+    {
+        $value = (string) $params->get($name, self::LOOK_DEFAULTS[$name]);
+
+        return \in_array($value, $allowed, true) ? $value : (string) self::LOOK_DEFAULTS[$name];
+    }
+
+    /**
+     * Reads a colour parameter as #rrggbb in lower case, the default when it is not #rgb or #rrggbb.
+     *
+     * The short form is written out, so #ddd and #DDDDDD are both recognised as the default and print
+     * nothing. What gets into the inline style is this rebuilt value, never the stored text: a
+     * semicolon or a brace in a setting cannot reach the page.
+     *
+     * @param   Registry  $params  The module parameters.
+     * @param   string    $name    The parameter.
+     *
+     * @return  string
+     *
+     * @since   1.1.0
+     */
+    private function getLookColour(Registry $params, string $name): string
+    {
+        $value = strtolower(trim((string) $params->get($name, self::LOOK_DEFAULTS[$name])));
+
+        if (preg_match('/^#([0-9a-f])([0-9a-f])([0-9a-f])$/', $value, $m)) {
+            $value = '#' . $m[1] . $m[1] . $m[2] . $m[2] . $m[3] . $m[3];
+        }
+
+        return preg_match('/^#[0-9a-f]{6}$/', $value) ? $value : (string) self::LOOK_DEFAULTS[$name];
+    }
+
+    /**
+     * Reads a whole number parameter within its range, the default when it is outside it or not a
+     * whole number at all. form_max relies on that: its 0, the full width, lies outside 300 to 1200
+     * and comes back as the default, which is exactly what it means.
+     *
+     * @param   Registry  $params  The module parameters.
+     * @param   string    $name    The parameter.
+     * @param   integer   $min     The smallest value allowed.
+     * @param   integer   $max     The largest value allowed.
+     *
+     * @return  integer
+     *
+     * @since   1.1.0
+     */
+    private function getLookNumber(Registry $params, string $name, int $min, int $max): int
+    {
+        $value = trim((string) $params->get($name, self::LOOK_DEFAULTS[$name]));
+
+        if (!preg_match('/^\d{1,4}$/', $value)) {
+            return (int) self::LOOK_DEFAULTS[$name];
+        }
+
+        $value = (int) $value;
+
+        return $value >= $min && $value <= $max ? $value : (int) self::LOOK_DEFAULTS[$name];
     }
 
     /**

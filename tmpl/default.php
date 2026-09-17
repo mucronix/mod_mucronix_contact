@@ -20,10 +20,12 @@ use Joomla\CMS\Uri\Uri;
  * @var   \stdClass                  $module
  * @var   \Joomla\Registry\Registry  $params
  * @var   \Joomla\CMS\Form\Form      $form
- * @var   array|null                 $result       ['success' => bool, 'messages' => string[]] after a submission
- * @var   string[]                   $warnings     Notices about settings that keep the form from working
- * @var   string                     $buttonClass  Classes the Field Markup gives the send button
- * @var   string                     $styleMode    Module Style: full, base or none
+ * @var   array|null                 $result          ['success' => bool, 'messages' => string[]] after a submission
+ * @var   string[]                   $warnings        Notices about settings that keep the form from working
+ * @var   string                     $buttonClass     Classes the Field Markup gives the send button
+ * @var   string                     $styleMode       Module Style: full, base or none
+ * @var   string                     $styleModifiers  Classes on the wrapper that switch the look rules on
+ * @var   string                     $styleVariables  The rule with the variables of this instance, or empty
  */
 
 // Only someone who can fix them is told; visitors see the form as usual
@@ -35,7 +37,8 @@ $intro      = trim((string) $params->get('form_intro', ''));
 $submitText = trim((string) $params->get('submit_text', ''));
 $submitText = $submitText !== '' ? $submitText : Text::_('MOD_MUCRONIX_CONTACT_FORM_SUBMIT');
 
-$wrapperClass = trim('mcx ' . $params->get('wrapper_class', ''));
+// The modifiers of the Module Style come first, the Wrapper Class parameter adds to them
+$wrapperClass = trim('mcx ' . trim($styleModifiers . ' ' . $params->get('wrapper_class', '')));
 $formClass    = trim('mcx-form ' . $params->get('form_class', ''));
 
 // The Button Class parameter goes after the classes of the Field Markup: it adds, it does not replace
@@ -66,6 +69,14 @@ $wa->useScript('mod_mucronix_contact.form');
  */
 if ($styleMode === 'full') {
     $wa->useStyle('mod_mucronix_contact.form-theme');
+
+    /*
+     * The values of the Appearance tab, as variables on the id of this instance. In the head rather
+     * than a style attribute, and after form-theme.css, whose rules read them.
+     */
+    if ($styleVariables !== '') {
+        $wa->addInlineStyle($styleVariables, [], [], ['mod_mucronix_contact.form-theme']);
+    }
 } elseif ($styleMode === 'base') {
     $wa->useStyle('mod_mucronix_contact.form');
 } else {
