@@ -56,8 +56,9 @@ article, and the attachment field with its own list of accepted extensions and s
 
 **Telegram** — see below.
 
-**Appearance** — whether to load the module stylesheet, and four places to hang your template's
-own classes: around the form, on the form, around each field, and on the send button.
+**Appearance** — how much of the look the module draws itself, which framework its fields belong to,
+the borders, frame, width and button, four places to hang your template's own classes, and a box for
+CSS of your own. See [Styling](#styling).
 
 **Advanced** — layout, module class suffix, and **Log Sent Messages**. Errors always go to
 `administrator/logs/mod_mucronix_contact.php`; successful sends only when you switch this on. Leave
@@ -194,12 +195,59 @@ for logged-in users alone.
 
 ## Styling
 
-Three ways in, from the plainest up. Nothing stops you mixing them.
+No code is needed for any of this: the **Appearance** tab is where the look is set. Below that come
+the two ways out for anything the tab leaves out, and they can all be mixed.
 
-### 1. Classes from the module settings
+### 1. The Appearance tab
 
-The **Appearance** tab carries four class fields. Each is added to the module's own class rather
-than put in its place, so the stylesheet and the script keep working whatever you hang on them.
+**Field Markup** adds the form classes of your template's framework. The module never takes a class
+away, so whatever the core prints stays.
+
+| Template | Choose |
+|---|---|
+| Cassiopeia and other Bootstrap 5 templates | Joomla (Bootstrap 5) |
+| YOOtheme Pro | UIkit (YOOtheme) |
+| Anything else | try both, keep the better one, or No Added Classes |
+
+**Own Styles** says how much the module draws: *Full* — spacing, borders, frame and button; *Basic* —
+spacing, the consent line and error highlighting, nothing more; *None* — not one stylesheet of the
+module, the template dresses the form.
+
+With *Full*, these appear. Each one takes effect only when it differs from its default, so a variable
+you may already have set in your template's CSS is not overruled by a setting nobody touched.
+
+| Group | Setting | Default |
+|---|---|---|
+| Fields | Field Look — Border / Bottom Line / As in Template | Border |
+| Fields | Border Colour | `#dddddd` |
+| Fields | Corner Radius, px (Border only) | `4` |
+| Fields | Space Between Fields, px | `12` |
+| Form | Frame Around the Form | No |
+| Form | Form Background — empty is transparent | empty |
+| Form | Form Width, px — 0 is the whole column | `0` |
+| Button | Button Look — Template Button / Module Button | Template Button |
+| Button | Accent Colour — button, field in focus, ticked checkbox | `#2f6fbf` |
+
+> ⚠️ **Give Accent Colour a dark shade.** It paints the box of a checkbox while the browser draws the
+> tick on top in white, and that tick cannot be restyled: a pale accent gives you white on white.
+
+**Form Width** narrows the whole module, the title above the form included. **Module Button** drops
+the framework classes from the button, because a template's `btn-primary` would keep bringing its own
+background and hover back over the accent colour.
+
+**Custom CSS** takes rules of your own. They are loaded after everything the module brings, so they
+win without `!important`, and they work whatever Own Styles is set to. The selector of that very form
+is printed under the box, in the shape `#mcx-12`.
+
+**Open the styling notes** is a button on the same tab. It opens a page of ready-made snippets for
+the cases that have no setting on purpose — a shadow, two fields in one row, labels, a dark
+background, the stars on required fields. The page ships with the module, one per language, at
+`media/mod_mucronix_contact/docs/styling.<language>.html`. It is not repeated here.
+
+### 2. Classes from your template
+
+The tab carries four class fields. Each is added to the module's own class rather than put in its
+place, so the stylesheet and the script keep working whatever you hang on them.
 
 | Setting | Lands on | Bootstrap | YOOtheme |
 |---|---|---|---|
@@ -208,21 +256,16 @@ than put in its place, so the stylesheet and the script keep working whatever yo
 | Field Class | the box around one field, its error message included | `mb-3` | `uk-margin` |
 | Button Class | the send button | `btn btn-primary` | `uk-button uk-button-primary` |
 
-This is where the width comes from as well: the module sets none, so the form is as wide as whatever
-it stands in.
-
 Field Class reaches every field, the ones added through Extra Fields included. One field is kept out
 of it — the hidden one that catches robots. A class of your own could give that field a display and
 bring it back into the page, where real people would fill it in and their messages would be thrown
 away without a word to anyone.
 
-### 2. Variables from your own CSS
+### 3. Variables in your template's CSS
 
-The module ships a small stylesheet: the spacing between fields, the width of the inputs, the
-consent checkbox, the highlighting of errors and the message block. It draws no card, no background,
-no border and no shadow — that is the template's job, through Wrapper Class above.
-
-What it does draw is held in variables, so one line in your template's CSS changes it everywhere:
+Everything the module draws is held in variables, so one line in your template's CSS changes it for
+every form at once — useful when a site has several. A setting on the Appearance tab overrides the
+variable for that one form, but only when it has been moved off its default.
 
 ```css
 .mcx {
@@ -236,8 +279,12 @@ What it does draw is held in variables, so one line in your template's CSS chang
 |---|---|---|
 | `--mcx-gap` | the air between one field and the next | `12px` |
 | `--mcx-label-gap` | the air between a label and its own field | `2px` |
-| `--mcx-accent` | the consent checkbox | `#2f6fbf` |
+| `--mcx-accent` | the button, a field in focus, the ticked checkbox | `#2f6fbf` |
 | `--mcx-radius` | the corner radius of the message and notice blocks | `4px` |
+| `--mcx-field-border` | the border of the fields, and the frame around the form | `#dddddd` |
+| `--mcx-field-radius` | the corner radius of the fields, the frame and the module button | `4px` |
+| `--mcx-form-bg` | the background behind the form | transparent |
+| `--mcx-form-max` | the largest width of the form | none |
 | `--mcx-ok`, `--mcx-ok-bg` | the block shown once a message has gone | `#27884a`, `#eaf6ee` |
 | `--mcx-error`, `--mcx-error-bg` | refusals, and the fields they belong to | `#c0392b`, `#fdecea` |
 | `--mcx-notice`, `--mcx-notice-bg` | the notice only site managers are shown | `#b8860b`, `#fff8e5` |
@@ -248,11 +295,13 @@ What it does draw is held in variables, so one line in your template's CSS chang
 >
 > On a template that draws checkboxes itself — Bootstrap does, Cassiopeia among them, with
 > `appearance: none` — this variable does not reach the checkbox at all and its look stays the
-> template's. Every other colour works everywhere.
+> template's. With Own Styles on *Full* the module paints such a checkbox itself instead. Every other
+> colour works everywhere.
 
-Switch the stylesheet off entirely with **Load Module CSS** if your template dresses its forms.
+The last four only ever do anything with Own Styles on *Full*: they are read by the rules that draw
+the borders, the frame and the width, and those are the rules *Basic* and *None* leave out.
 
-### 3. Overriding the layout
+### 4. Overriding the layout
 
 Copy `tmpl/default.php` to `templates/<your template>/html/mod_mucronix_contact/default.php` and
 edit the copy. Joomla finds it by itself, and updates leave it alone.
@@ -309,6 +358,15 @@ Drop any of these and **messages land in the wrong place, or nowhere**:
 
 The module carries an update server, so Joomla offers new versions in the usual place. Releases and
 their notes are at <https://github.com/mucronix/mod_mucronix_contact/releases>.
+
+Updating from 1.0.x moves the old **Load Module CSS** setting to the new ones by itself: the
+stylesheet on becomes Own Styles *Basic*, off becomes *None*, and Field Markup becomes *No Added
+Classes*. That is the look you already had, so nothing changes on the page.
+
+> ⚠️ **Installing an older version over a newer one costs you the settings the old one never had.**
+> The module itself survives it, but the settings form saves only the fields it knows: open a module
+> afterwards, save it, and Custom CSS and the look parameters are gone, because 1.0.x has nowhere to
+> put them. Write them down first if you ever go back.
 
 ---
 

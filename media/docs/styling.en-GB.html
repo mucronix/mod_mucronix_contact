@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mucronix Contact — styling notes</title>
+<style>
+    :root { color-scheme: light dark; }
+    body {
+        margin: 0 auto; padding: 24px 20px 64px; max-width: 860px;
+        font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        color: #1c1c1c; background: #ffffff;
+    }
+    h1 { font-size: 26px; margin: 0 0 8px; }
+    h2 { font-size: 20px; margin: 36px 0 8px; padding-top: 16px; border-top: 1px solid #e2e2e2; }
+    p, li { margin: 8px 0; }
+    code { font-family: ui-monospace, Consolas, monospace; font-size: 14px; background: #f2f4f7; padding: 1px 5px; border-radius: 3px; }
+    pre { background: #f2f4f7; border-left: 3px solid #2f6fbf; padding: 12px 14px; overflow-x: auto; border-radius: 4px; }
+    pre code { background: none; padding: 0; }
+    .lead { color: #444444; }
+    .step { margin: 10px 0 0; padding-left: 18px; border-left: 2px solid #dddddd; }
+    .step b { display: inline-block; min-width: 92px; color: #2f6fbf; }
+    .note { background: #fff8e5; border-left: 4px solid #b8860b; padding: 10px 14px; border-radius: 4px; }
+    @media (prefers-color-scheme: dark) {
+        body { color: #e8e8e8; background: #1b1c1e; }
+        h2 { border-top-color: #333333; }
+        code, pre { background: #26282b; }
+        .lead { color: #b6b6b6; }
+        .step { border-left-color: #3a3a3a; }
+        .note { background: #332b13; }
+    }
+</style>
+</head>
+<body>
+
+<h1>Styling notes</h1>
+<p class="lead">Everything the form needs for a decent look on any template is a setting on the
+<b>Appearance</b> tab. The snippets here are for the rest: the cases where there is no setting,
+because a setting for each of them would turn a contact form into a form builder.</p>
+
+<h2>Your selector</h2>
+<p>Every snippet begins with <code>YOUR-FORM</code>. Replace it with the selector of your own form,
+which is printed right under the <b>Custom CSS</b> box on the Appearance tab, in the shape
+<code>#mcx-12</code>, where 12 is the id of this module. Paste the snippet into that same box.</p>
+<p>Custom CSS is loaded after everything else the module brings, so it wins without
+<code>!important</code>. It works with any value of <b>Own Styles</b>, and it applies to this form
+alone: another instance of the module keeps its own.</p>
+
+<h2>1. Which Field Markup to choose</h2>
+<p class="step"><b>You want:</b> the fields and the button to look like the rest of the site.</p>
+<p class="step"><b>Setting:</b> <b>Field Markup</b> — <i>Joomla (Bootstrap 5)</i> for Cassiopeia and
+other Bootstrap templates, <i>UIkit (YOOtheme)</i> for YOOtheme Pro. On any other template try both
+and keep the one that looks better; <i>No Added Classes</i> leaves the fields exactly as the
+template drew them.</p>
+<p class="step"><b>Check:</b> the send button takes the shape and colour of other buttons on the
+site.</p>
+
+<h2>2. The form does not look the way you expected</h2>
+<p class="step"><b>Check in this order:</b></p>
+<ol>
+    <li><b>Own Styles</b> — <i>Full</i> draws borders, frame and button; <i>Basic</i> only spaces the
+    fields out; <i>None</i> hands the whole form to the template.</li>
+    <li><b>Field Markup</b> — the wrong framework adds classes the template has no rules for.</li>
+    <li>Reload the page with <b>Ctrl+Shift+R</b>. A stylesheet that has changed is still the old one
+    in the browser otherwise, and you will be looking at the previous version.</li>
+    <li>Clear the template cache if your template has one of its own.</li>
+</ol>
+
+<h2>3. A shadow around the form</h2>
+<p class="step"><b>You want:</b> the form to stand out as a card.</p>
+<p class="step"><b>Setting:</b> the nearest ones are <b>Frame Around the Form</b> and <b>Form
+Background</b>. A shadow has none, on purpose: with a template class it is one field away, see
+<b>Wrapper Class</b> and its <code>card</code> or <code>uk-card</code>.</p>
+<p class="step"><b>Snippet:</b></p>
+<pre><code>YOUR-FORM {
+    box-shadow: 0 2px 14px rgba(0, 0, 0, .15);
+    border-radius: 6px;
+    padding: 20px;
+}</code></pre>
+<p class="step"><b>Check:</b> the shadow is there, and the fields are not touching the edge. Drop the
+<code>padding</code> line if Frame Around the Form or Form Background is already on: they bring their
+own.</p>
+
+<h2>4. The button colour on hover</h2>
+<p class="step"><b>You want:</b> your own colour under the pointer.</p>
+<p class="step"><b>Setting:</b> <b>Button Look</b> — <i>Module Button</i>, and <b>Accent Colour</b>
+for its normal state. The module darkens that colour on hover by itself, and there is no setting for
+a second colour.</p>
+<p class="step"><b>Snippet:</b></p>
+<pre><code>YOUR-FORM .mcx-submit:hover {
+    background-color: #1f4f8f;
+    filter: none;
+}</code></pre>
+<p class="step"><b>Check:</b> point at the button. With <i>Template Button</i> the hover is the
+template's and this snippet does nothing.</p>
+
+<h2>5. Name and E-mail in one row on a wide screen</h2>
+<p class="step"><b>You want:</b> two short fields side by side, everything else full width.</p>
+<p class="step"><b>Setting:</b> none. The module keeps one field per row, which is what works on a
+phone.</p>
+<p class="step"><b>Snippet:</b></p>
+<pre><code>@media (min-width: 640px) {
+    YOUR-FORM .mcx-form {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 16px;
+    }
+
+    YOUR-FORM .mcx-form > * { grid-column: 1 / -1; }
+
+    YOUR-FORM .mcx-field-wrap:has(.mcx-field--name),
+    YOUR-FORM .mcx-field-wrap:has(.mcx-field--email) { grid-column: span 1; }
+}</code></pre>
+<p class="step"><b>Check:</b> widen the window — Name and E-mail share a row, the message box and the
+button stay full width. Narrow it again: one field per row.</p>
+
+<h2>6. The size and colour of the labels</h2>
+<p class="step"><b>You want:</b> labels quieter, or larger.</p>
+<p class="step"><b>Setting:</b> none. Fonts and text sizes belong to the template throughout.</p>
+<p class="step"><b>Snippet:</b></p>
+<pre><code>YOUR-FORM .mcx-field .control-label {
+    font-size: 15px;
+    font-weight: 600;
+    color: #555555;
+}</code></pre>
+<p class="step"><b>Check:</b> every label changes, the consent wording beside the checkbox
+included.</p>
+
+<h2>7. The form on a dark background</h2>
+<p class="step"><b>You want:</b> the form to sit in a dark section of the page.</p>
+<p class="step"><b>Setting:</b> <b>Form Background</b> takes a dark colour, but the text and the
+fields inside it are the template's.</p>
+<p class="step"><b>Snippet:</b></p>
+<pre><code>YOUR-FORM {
+    color: #f0f0f0;
+    --mcx-error: #ff9a90;
+    --mcx-error-bg: #3a2020;
+    --mcx-ok: #a5d6a7;
+    --mcx-ok-bg: #1f3a24;
+}
+
+YOUR-FORM .form-control,
+YOUR-FORM .form-select {
+    background-color: #2a2c30;
+    border-color: #555a61;
+    color: #f0f0f0;
+}
+
+YOUR-FORM .form-control::placeholder { color: #a6a6a6; }</code></pre>
+<p class="step"><b>Check:</b> send the form empty — the refusal has to be readable on the dark
+background as well, not dark red on dark grey.</p>
+
+<h2>8. The colour of error messages</h2>
+<p class="step"><b>You want:</b> refusals in your own red, or in something softer.</p>
+<p class="step"><b>Setting:</b> none — one accent colour covers the button, the focus and the
+checkbox, and errors are deliberately not tied to it.</p>
+<p class="step"><b>Snippet:</b></p>
+<pre><code>YOUR-FORM {
+    --mcx-error: #b00020;
+    --mcx-error-bg: #fdeaec;
+}</code></pre>
+<p class="step"><b>Check:</b> send the form with an empty Name. Both the text under the field and the
+border of the field itself take the new colour.</p>
+
+<h2>9. Hiding the stars on required fields</h2>
+<p class="step"><b>You want:</b> no <code>*</code> after the labels.</p>
+<p class="step"><b>Setting:</b> none. Joomla prints the star for every required field.</p>
+<p class="step"><b>Snippet:</b></p>
+<pre><code>YOUR-FORM .control-label .star { display: none; }</code></pre>
+<p class="step"><b>Check:</b> the stars are gone. The fields stay required, and an empty one is still
+refused — so say somewhere else which fields have to be filled in.</p>
+
+<h2>10. Form Width did nothing, or narrowed too much</h2>
+<p class="step"><b>You want:</b> the form narrower than the column it stands in.</p>
+<p class="step"><b>Setting:</b> <b>Form Width</b>. It narrows the whole module, the title above the
+form included, by addressing the element your template wraps the module in.</p>
+<p class="step"><b>If your template put several modules into that one element</b>, they all narrow
+together. Set Form Width back to 0 and use this instead, which narrows this form alone:</p>
+<pre><code>YOUR-FORM { max-width: 560px; }</code></pre>
+<p class="step"><b>Check:</b> the neighbouring modules are their usual width again, and the form is
+the width you asked for.</p>
+
+<h2>When a snippet does nothing</h2>
+<ul>
+    <li>Check that <code>YOUR-FORM</code> was replaced by the selector printed under the Custom CSS
+    box — with the <code>#</code> and the right id.</li>
+    <li>Reload with <b>Ctrl+Shift+R</b>.</li>
+    <li>A template rule may be stronger. Write the selector twice, with no space between the two,
+    to outweigh it: <code>#mcx-12#mcx-12 .mcx-submit { … }</code> — an ugly trick, but a legitimate
+    one, and still not <code>!important</code>.</li>
+</ul>
+
+</body>
+</html>

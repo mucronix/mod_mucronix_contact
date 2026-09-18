@@ -28,6 +28,8 @@
 	<media destination="mod_mucronix_contact" folder="media">
 		<filename>joomla.asset.json</filename>
 		<folder>css</folder>
+		<!-- The styling notes, one page per language, opened by the button on the Appearance tab -->
+		<folder>docs</folder>
 		<folder>js</folder>
 	</media>
 	<languages>
@@ -565,6 +567,13 @@
 					description="MOD_MUCRONIX_CONTACT_FIELD_CUSTOM_CSS_DESC"
 					rows="8"
 					filter="raw"
+				/>
+
+				<field
+					name="styling_docs"
+					type="stylingdocs"
+					label="MOD_MUCRONIX_CONTACT_FIELD_STYLING_DOCS_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_STYLING_DOCS_DESC"
 				/>
 			</fieldset>
 
