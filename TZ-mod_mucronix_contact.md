@@ -115,7 +115,8 @@ mod_mucronix_contact/
 │   ├── Dispatcher/
 │   │   └── Dispatcher.php           наследник AbstractModuleDispatcher
 │   ├── Field/
-│   │   └── StylingDocsField.php     кнопка «Открыть пояснения» (1.1.0, раздел 20.8)
+│   │   ├── CustomcssField.php       поле «Свой CSS» с подписью-селектором (1.1.0, раздел 20.7)
+│   │   └── StylingdocsField.php     кнопка «Открыть пояснения» (1.1.0, раздел 20.8)
 │   └── Helper/
 │       ├── MucronixContactHelper.php    построение формы, валидация, отправка
 │       ├── MessageFields.php        обход полей, общий для письма и Telegram
@@ -1435,7 +1436,7 @@ YOOtheme Pro 5.0.23, дочерняя тема DJ-Electronics (`yootheme_djex`),
 - Кнопка календаря получает `btn btn-primary` из ядра всегда
   (`calendar.php:163`) — раздел 17.
 - ⚠️ **`build.php` перечисляет файлы поимённо** (`build.php:95–97`).
-  Правится на этапе 2 (CSS) и этапе 6 (`docs`, `StylingDocsField.php`),
+  Правится на этапе 2 (CSS) и этапе 6 (`docs`, `StylingdocsField.php`),
   иначе новые файлы не попадут в пакет, а сборка упадёт на удалённом
   `form.css`.
 - Старый `media/…/css/form.css` после обновления может остаться на сайте.
@@ -1665,7 +1666,13 @@ YOOtheme Pro 5.0.23, дочерняя тема DJ-Electronics (`yootheme_djex`),
 
 ### 20.8. Кнопка и файл пояснений
 
-- Кнопка — свой тип поля `src/Field/StylingDocsField.php`, выводит
+- ⚠️ **Имя класса своего типа поля строит ядро**: `FormHelper::loadClass()`
+  собирает его как `ucfirst(тип) . 'Field'` за префиксом из `addfieldprefix`.
+  Отсюда `type="stylingdocs"` и класс `StylingdocsField`, а не `StylingDocsField`:
+  имя в удобном регистре нашлось бы на Windows и не нашлось на боевом Linux.
+  Составной тип через точку не берём. Так же сделано поле «Свой CSS»
+  (`type="customcss"`, класс `CustomcssField`, раздел 20.7).
+- Кнопка — свой тип поля `src/Field/StylingdocsField.php`, выводит
   `<a class="btn btn-secondary" href="…" target="_blank" rel="noopener">`.
   **Никаких `onclick` в разметке.** Как объявить свой тип поля
   в манифесте модуля (`addfieldprefix` на `<fieldset>`) — взять
@@ -1751,7 +1758,7 @@ YOOtheme Pro 5.0.23, дочерняя тема DJ-Electronics (`yootheme_djex`),
 | 3 | Параметры вида, переменные, модификаторы (20.2, 20.5) | ручная проверка на Cassiopeia |
 | 4 | Свой CSS (20.7) | случаи на `<` зелёные после красного |
 | 5 | Миграция 1.0.x (20.6) | случай на миграцию, обновление 1.0.1 → сборка |
-| 6 | Файл пояснений и кнопка (20.8), языки (20.9), README (раздел 18), `docs` и `StylingDocsField.php` в `build.php` | куски проверены на Cassiopeia, пакет собран |
+| 6 | Файл пояснений и кнопка (20.8), языки (20.9), README (раздел 18), `docs` и `StylingdocsField.php` в `build.php` | куски проверены на Cassiopeia, пакет собран |
 | 7 | Полная проверка (20.10), выпуск по разделу 14 | 9 сочетаний на двух шаблонах |
 
 После каждого этапа — коммит и короткий отчёт; дальше не идти без
