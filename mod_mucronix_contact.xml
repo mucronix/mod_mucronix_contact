@@ -7,7 +7,7 @@
 	<license>GNU General Public License version 2 or later; see LICENSE</license>
 	<authorEmail>support@mucronix.com</authorEmail>
 	<authorUrl>https://mucronix.com</authorUrl>
-	<version>1.0.1</version>
+	<version>1.1.0</version>
 	<description>MOD_MUCRONIX_CONTACT_XML_DESCRIPTION</description>
 	<scriptfile>script.php</scriptfile>
 	<namespace path="src">Mucronix\Module\MucronixContact</namespace>
