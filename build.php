@@ -86,6 +86,7 @@ $files = [
     'forms/contact.xml',
     'layouts/mucronix/form/field/file.php',
     'src/Dispatcher/Dispatcher.php',
+    'src/Field/CustomcssField.php',
     'src/Helper/MailSender.php',
     'src/Helper/MessageFields.php',
     'src/Helper/MucronixContactHelper.php',

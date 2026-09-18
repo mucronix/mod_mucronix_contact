@@ -6,15 +6,15 @@
  */
 
 /*
- * The look of the form, loaded only with the Module Style "Full" and always after form-base.css,
+ * The look of the form, loaded only with the Own Styles "Full" and always after form-base.css,
  * on which the asset depends. Everything the Appearance tab draws lives here and nowhere else: the
  * borders of the fields, the frame, background and width of the form, the button of the module and
  * the field in focus. "Basic" and "None" leave this file out, and with it every border but the red
  * one of a field in error.
  *
  * Nothing is drawn unless a modifier on the wrapper asks for it: mcx--fields-box, mcx--fields-line,
- * mcx--form-framed, mcx--button-own. mcx--fields-theme has no rules on purpose - it is the template's
- * look, untouched.
+ * mcx--form-framed, mcx--form-bg, mcx--button-own. mcx--fields-theme has no rules on purpose - it is
+ * the template's look, untouched.
  *
  * The values come as variables printed on the id of the instance, #mcx-<id>, and only when they
  * differ from the defaults. Every var() below therefore carries the default as its fallback, the same
@@ -100,11 +100,10 @@
 /*
  * The rest of the look sits in :where(), so it weighs nothing: the Wrapper Class of a template - a
  * card, for one - and Custom CSS win over it without trying.
- */
-/*
+ *
  * The width belongs to the whole module - the title above the form is part of it - and the element
  * holding both is the module container of the template, which this file cannot name. So the width
- * arrives as a second inline rule beside the variables, :where(:has(> #mcx-<id>)), and this one
+ * arrives as a second inline rule beside the variables, :where(:has(> #mcx-<id>)), and the one here
  * keeps the form itself in step wherever that container is shared with other modules.
  */
 :where(.mcx) {

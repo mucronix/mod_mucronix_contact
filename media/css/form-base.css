@@ -7,7 +7,7 @@
 
 /*
  * The layout of the form: spacing, widths, the consent line, errors and messages. Loaded by the
- * Module Style "Full" and "Basic" alike, and "Basic" is exactly this file - the form.css of 1.0.x,
+ * Own Styles "Full" and "Basic" alike, and "Basic" is exactly this file - the form.css of 1.0.x,
  * rule for rule, so a site switched to it on update looks the way it did.
  *
  * Every selector sits inside .mcx, so no other form on the site is touched, and nothing here uses

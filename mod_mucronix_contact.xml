@@ -346,7 +346,9 @@
 				/>
 			</fieldset>
 
-			<fieldset name="appearance" label="MOD_MUCRONIX_CONTACT_FIELDSET_APPEARANCE_LABEL">
+			<!-- The prefix is how a field type of our own is found: FormHelper::loadClass() puts the
+			     type with its first letter raised and "Field" after it behind this namespace. -->
+			<fieldset name="appearance" label="MOD_MUCRONIX_CONTACT_FIELDSET_APPEARANCE_LABEL" addfieldprefix="Mucronix\Module\MucronixContact\Site\Field">
 				<!-- Classes are added to what the core layouts print, never taken away. The table
 				     of classes lives in the helper, MARKUP_CLASSES. -->
 				<field
@@ -551,6 +553,18 @@
 					label="MOD_MUCRONIX_CONTACT_FIELD_FIELD_CLASS_LABEL"
 					description="MOD_MUCRONIX_CONTACT_FIELD_FIELD_CLASS_DESC"
 					validate="CssIdentifier"
+				/>
+
+				<!-- Kept as it was typed, filter raw: css is not html and a filter would eat at it.
+				     What makes it safe is done when it is printed, in the layout: every "<" is
+				     dropped, and without one no tag can be closed. -->
+				<field
+					name="custom_css"
+					type="customcss"
+					label="MOD_MUCRONIX_CONTACT_FIELD_CUSTOM_CSS_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_CUSTOM_CSS_DESC"
+					rows="8"
+					filter="raw"
 				/>
 			</fieldset>
 

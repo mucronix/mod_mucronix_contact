@@ -44,7 +44,7 @@
  * Usage:
  *   php tests/honeypot-test.php [--url=http://joomla6/] [--page=/] [--log=<path>] [--slow] [--telegram]
  *                              [--success-page] [--markup=joomla|uikit|none] [--style=full|base|none]
- *                              [--page-only]
+ *                              [--page-only] [--custom-css]
  *
  * --slow adds the expired captcha case, which idles about five minutes.
  *
@@ -55,12 +55,16 @@
  * --markup adds the Field Markup case, and names the variant set on the Appearance tab: the page cannot
  * tell a variant from the same classes typed into Button Class.
  *
- * --style adds the Module Style case and names the value set on the Appearance tab, for the same
+ * --style adds the Own Styles case and names the value set on the Appearance tab, for the same
  * reason: the stylesheets on the page are what is being judged, so they cannot be what tells the
  * value.
  *
- * --page-only runs just the cases asked for with --markup and --style and sends nothing, so every
- * variant can be checked one after another without a round of messages each time.
+ * --custom-css adds the Custom CSS case. It needs the probe printed by that case pasted into the
+ * field first, and says so when it is missing: an empty field would let the case pass for the wrong
+ * reason.
+ *
+ * --page-only runs just the cases asked for with --markup, --style and --custom-css and sends nothing,
+ * so every variant can be checked one after another without a round of messages each time.
  *
  * --telegram adds the case for sending to Telegram, and says so because nothing in the page shows
  * whether it is switched on. The case asks one thing: with Telegram on, the message still goes out.
@@ -71,12 +75,13 @@
  * Exit code 0 when every case behaves as it should, 1 otherwise.
  */
 
-$options     = getopt('', ['url::', 'page::', 'log::', 'slow', 'telegram', 'success-page', 'markup:', 'style:', 'page-only']);
+$options     = getopt('', ['url::', 'page::', 'log::', 'slow', 'telegram', 'success-page', 'markup:', 'style:', 'custom-css', 'page-only']);
 $slow        = isset($options['slow']);
 $telegram    = isset($options['telegram']);
 $successPage = isset($options['success-page']);
 $markup      = $options['markup'] ?? null;
 $style       = $options['style'] ?? null;
+$customCss   = isset($options['custom-css']);
 $pageOnly    = isset($options['page-only']);
 
 if ($markup !== null && !in_array($markup, ['joomla', 'uikit', 'none'], true)) {
@@ -89,8 +94,8 @@ if ($style !== null && !in_array($style, ['full', 'base', 'none'], true)) {
     exit(1);
 }
 
-if ($pageOnly && $markup === null && $style === null) {
-    fwrite(STDERR, "--page-only needs --markup or --style: the page cannot say which value was chosen\n");
+if ($pageOnly && $markup === null && $style === null && !$customCss) {
+    fwrite(STDERR, "--page-only needs --markup, --style or --custom-css: there would be nothing to run\n");
     exit(1);
 }
 $baseUrl = rtrim($options['url'] ?? 'http://joomla6/', '/') . '/';
@@ -108,6 +113,12 @@ if (!is_file($logFile)) {
     fwrite(STDERR, "the file appears once the module has logged something: switch on \"Log Sent Messages\" and send once\n");
     exit(1);
 }
+
+/**
+ * What the Custom CSS case asks to be pasted into the field. Two ordinary rules with a closing style
+ * tag and a script between them: the rules have to arrive, the tag and the script must not.
+ */
+const CUSTOM_CSS_PROBE = "#mcx-probe { color: #ff0000; }\n</style><script>console.log('mcx')</script>\n.mcx .mcx-field-wrap { outline: 0; }";
 
 /**
  * Fields the script fills itself, and whose values several cases depend on.
@@ -905,7 +916,7 @@ function honeypotFieldCase(string $title, string $baseUrl, string $page, string 
 
     // Hidden by the markup, so that switching the module CSS off cannot put it back on the page
     if (!preg_match('/<div class="mcx-hp"[^>]*\shidden/i', $form['html'])) {
-        $wrong[] = 'the wrapper has no hidden attribute: with Module Style "None" the field becomes visible';
+        $wrong[] = 'the wrapper has no hidden attribute: with Own Styles "None" the field becomes visible';
     }
 
     $ok = $wrong === [];
@@ -1198,7 +1209,85 @@ function markupCase(string $title, string $markup, string $baseUrl, string $page
 }
 
 /**
- * The Module Style, read from the page.
+ * The Custom CSS box, read from the page.
+ *
+ * What it has to prove is that the text reaches the page as CSS and only as CSS. The probe below is
+ * pasted into the field by hand - the script cannot set a module parameter - and it carries the two
+ * characters that matter: a closing style tag and a script after it. Every "<" has to be gone, so the
+ * block cannot end early and nothing can be opened after it, while the ordinary rules around them
+ * still arrive. It also has to come after the stylesheets of the module, or it would lose to them.
+ *
+ * Judged only by what this case controls: the probe it asked for. What else the field may hold is
+ * the site owner's business.
+ */
+function customCssCase(string $title, string $baseUrl, string $page): bool
+{
+    $form  = readForm(request($baseUrl . ltrim($page, '/'), newJar()));
+    $html  = $form['html'];
+    $wrong = [];
+
+    preg_match_all('/<style\b[^>]*>(.*?)<\/style>/is', $html, $blocks, PREG_OFFSET_CAPTURE);
+
+    $ours = array_values(array_filter($blocks[1], static fn (array $block): bool => str_contains($block[0], '#mcx-probe')));
+
+    if ($ours === []) {
+        report($title, 'not on the page', 'as css only', 0, false, false);
+        echo "  no inline style holding #mcx-probe. Paste this into Custom CSS on the Appearance tab:\n";
+
+        foreach (explode("\n", CUSTOM_CSS_PROBE) as $line) {
+            echo '    ', $line, "\n";
+        }
+
+        return false;
+    }
+
+    if (count($ours) > 1) {
+        $wrong[] = 'the probe is printed in ' . count($ours) . ' style blocks';
+    }
+
+    [$css, $offset] = $ours[0];
+
+    if (str_contains($css, '<')) {
+        $wrong[] = 'the style block still holds a "<": ' . trim(substr($css, strpos($css, '<'), 40));
+    }
+
+    // The rules on either side of the refused part have to survive it
+    foreach (['#mcx-probe', 'color: #ff0000', 'outline: 0'] as $needle) {
+        if (!str_contains($css, $needle)) {
+            $wrong[] = 'the css lost "' . $needle . '" on the way to the page';
+        }
+    }
+
+    if (preg_match('/<script\b[^>]*>\s*console\.log\([\'"]mcx/i', $html)) {
+        $wrong[] = 'the script in the probe became a real script tag';
+    }
+
+    // After the stylesheets of the module, whichever of them this Own Styles setting brought
+    if (preg_match_all('/<link\b[^>]*mod_mucronix_contact\/css\/[a-z-]+(?:\.min)?\.css[^>]*>/i', $html, $links, PREG_OFFSET_CAPTURE)) {
+        $last = end($links[0])[1];
+
+        if ($offset < $last) {
+            $wrong[] = 'the Custom CSS comes before a stylesheet of the module, so the module wins over it';
+        }
+    }
+
+    $ok = $wrong === [];
+
+    report($title, $ok ? 'as css only' : 'wrong', 'as css only', 0, false, $ok);
+
+    foreach ($wrong as $line) {
+        echo '  ', $line, "\n";
+    }
+
+    if ($ok) {
+        echo '  the probe is on the page as css, with every "<" gone', "\n";
+    }
+
+    return $ok;
+}
+
+/**
+ * The Own Styles, read from the page.
  *
  * "Full" links form-base.css and then form-theme.css, "Basic" the first alone, "None" neither. The
  * stylesheet of 1.0.x, form.css, must not be asked for in any of them: it is no longer shipped, and
@@ -1720,6 +1809,11 @@ if ($pageOnly) {
         $failed += styleCase('style: ' . $style . ', stylesheets and the trap', $style, $baseUrl, $page) ? 0 : 1;
     }
 
+    if ($customCss) {
+        $asked++;
+        $failed += customCssCase('custom css: on the page as css only', $baseUrl, $page) ? 0 : 1;
+    }
+
     foreach ($jars as $jar) {
         @unlink($jar);
     }
@@ -1862,12 +1956,20 @@ if ($markup !== null) {
     echo "\nskipped: the Field Markup case. Pass --markup=joomla|uikit|none, the value set on the Appearance tab.\n";
 }
 
-// The Module Style, only with --style, for the same reason
+// The Own Styles, only with --style, for the same reason
 if ($style !== null) {
     $total++;
     $failures += styleCase('style: ' . $style . ', stylesheets and the trap', $style, $baseUrl, $page) ? 0 : 1;
 } else {
-    echo "\nskipped: the Module Style case. Pass --style=full|base|none, the value set on the Appearance tab.\n";
+    echo "\nskipped: the Own Styles case. Pass --style=full|base|none, the value set on the Appearance tab.\n";
+}
+
+// Custom CSS, only with --custom-css: the probe has to be pasted into the field by hand
+if ($customCss) {
+    $total++;
+    $failures += customCssCase('custom css: on the page as css only', $baseUrl, $page) ? 0 : 1;
+} else {
+    echo "\nskipped: the Custom CSS case. Pass --custom-css once the probe is in the field.\n";
 }
 
 /*

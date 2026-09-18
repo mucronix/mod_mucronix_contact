@@ -164,7 +164,7 @@ class MucronixContactHelper implements DatabaseAwareInterface
     private const MARKUP_SKIPPED = ['captcha', 'mcx_hp'];
 
     /**
-     * The Module Style values: full loads form-base.css and form-theme.css, base only the first,
+     * The Own Styles values: full loads form-base.css and form-theme.css, base only the first,
      * none neither of them.
      *
      * @var    string[]
@@ -173,7 +173,7 @@ class MucronixContactHelper implements DatabaseAwareInterface
     private const STYLE_MODES = ['full', 'base', 'none'];
 
     /**
-     * The Module Style of a new installation, and what an unknown value falls back to.
+     * The Own Styles of a new installation, and what an unknown value falls back to.
      *
      * @var    string
      * @since  1.1.0
@@ -360,7 +360,7 @@ class MucronixContactHelper implements DatabaseAwareInterface
     }
 
     /**
-     * Returns the Module Style of the module instance: full, base or none.
+     * Returns the Own Styles of the module instance: full, base or none.
      *
      * @param   Registry  $params  The module parameters.
      *
@@ -400,7 +400,7 @@ class MucronixContactHelper implements DatabaseAwareInterface
 
     /**
      * Returns the modifier classes of the root wrapper that switch the rules of form-theme.css on.
-     * Empty unless the Module Style is full: without form-theme.css they would mean nothing.
+     * Empty unless the Own Styles is full: without form-theme.css they would mean nothing.
      *
      * @param   Registry  $params  The module parameters.
      *

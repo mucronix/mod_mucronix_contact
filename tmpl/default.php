@@ -23,7 +23,7 @@ use Joomla\CMS\Uri\Uri;
  * @var   array|null                 $result          ['success' => bool, 'messages' => string[]] after a submission
  * @var   string[]                   $warnings        Notices about settings that keep the form from working
  * @var   string                     $buttonClass     Classes the Field Markup gives the send button
- * @var   string                     $styleMode       Module Style: full, base or none
+ * @var   string                     $styleMode       Own Styles: full, base or none
  * @var   string                     $styleModifiers  Classes on the wrapper that switch the look rules on
  * @var   string                     $styleVariables  The rule with the variables of this instance, or empty
  */
@@ -37,7 +37,7 @@ $intro      = trim((string) $params->get('form_intro', ''));
 $submitText = trim((string) $params->get('submit_text', ''));
 $submitText = $submitText !== '' ? $submitText : Text::_('MOD_MUCRONIX_CONTACT_FORM_SUBMIT');
 
-// The modifiers of the Module Style come first, the Wrapper Class parameter adds to them
+// The modifiers of the Own Styles come first, the Wrapper Class parameter adds to them
 $wrapperClass = trim('mcx ' . trim($styleModifiers . ' ' . $params->get('wrapper_class', '')));
 $formClass    = trim('mcx-form ' . $params->get('form_class', ''));
 
@@ -60,8 +60,11 @@ $wa = Factory::getApplication()->getDocument()->getWebAssetManager();
 $wa->getRegistry()->addExtensionRegistryFile('mod_mucronix_contact');
 $wa->useScript('mod_mucronix_contact.form');
 
+// What the Custom CSS of this instance has to come after, so that it wins without a fight
+$styleAfter = [];
+
 /*
- * Module Style. "Full" takes the layout and the look, "Basic" the layout alone - the stylesheet of
+ * Own Styles. "Full" takes the layout and the look, "Basic" the layout alone - the stylesheet of
  * 1.0.x - and "None" leaves the form to the template. The look depends on the layout in
  * joomla.asset.json, so it can never arrive without it. The uris carry no css segment, the same way
  * the script carries no js one: with it Joomla looks for media/mod_mucronix_contact/css/css/...,
@@ -69,16 +72,23 @@ $wa->useScript('mod_mucronix_contact.form');
  */
 if ($styleMode === 'full') {
     $wa->useStyle('mod_mucronix_contact.form-theme');
+    $styleAfter = ['mod_mucronix_contact.form-theme'];
 
     /*
      * The values of the Appearance tab, as variables on the id of this instance. In the head rather
-     * than a style attribute, and after form-theme.css, whose rules read them.
+     * than a style attribute, and after form-theme.css, whose rules read them. The asset is named
+     * instead of being left to a hash of its content, so that the Custom CSS below can be put after
+     * this one by name.
      */
     if ($styleVariables !== '') {
-        $wa->addInlineStyle($styleVariables, [], [], ['mod_mucronix_contact.form-theme']);
+        $variables = 'mod_mucronix_contact.variables.' . $moduleId;
+
+        $wa->addInlineStyle($styleVariables, ['name' => $variables], [], $styleAfter);
+        $styleAfter = [$variables];
     }
 } elseif ($styleMode === 'base') {
     $wa->useStyle('mod_mucronix_contact.form');
+    $styleAfter = ['mod_mucronix_contact.form'];
 } else {
     /*
      * The second lock on the trap outlives the stylesheet it came from. The hidden attribute is the
@@ -86,6 +96,21 @@ if ($styleMode === 'full') {
      * content, so two forms on one page print it once.
      */
     $wa->addInlineStyle('.mcx .mcx-hp { display: none; }');
+}
+
+/*
+ * Custom CSS, last of all, so that it overrides everything the module brought with it. It works in
+ * all three Own Styles settings: switching the stylesheets off is no reason to lose the one place where
+ * the site owner writes rules.
+ *
+ * Every "<" is dropped here rather than on saving. CSS has no use for the character, and without one
+ * the </style> that would end the block early cannot be written - nor can a tag be opened after it.
+ * Cleaning at the point of printing also covers whatever is already stored from before.
+ */
+$customCss = trim(str_replace('<', '', (string) $params->get('custom_css', '')));
+
+if ($customCss !== '') {
+    $wa->addInlineStyle($customCss, [], [], $styleAfter);
 }
 
 Text::script('MOD_MUCRONIX_CONTACT_FORM_SENDING');
