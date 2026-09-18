@@ -86,17 +86,89 @@ final class MessageFields
                 continue;
             }
 
-            if (trim((string) $value) === '') {
+            $value = self::value($form, $field->fieldname, $value);
+
+            if ($value === '') {
                 continue;
             }
 
             $fields[] = [
                 'label' => self::label($field),
-                'value' => (string) $value,
+                'value' => $value,
             ];
         }
 
         return $fields;
+    }
+
+    /**
+     * The value of one field as a notification wants it.
+     *
+     * A field with options sends the value of the option, not its wording: "phone", "day", "price".
+     * That is what a form needs and not at all what a recipient needs, so the wording is put back
+     * here. A value with no option to match - which only a form the module did not draw can produce -
+     * is written as it came, because saying nothing would be worse.
+     *
+     * A checkbox list sends an array of everything that was ticked, and which ones they are is the
+     * information itself, so they are written out side by side. Cast to a string instead, as this
+     * did until 1.1.0, the recipient reads the word "Array" and php logs a warning behind it.
+     *
+     * @param   Form               $form   The form the field belongs to.
+     * @param   string             $name   The name of the field.
+     * @param   array|string|null  $value  What arrived for it.
+     *
+     * @return  string  Empty when there is nothing to report.
+     *
+     * @since   1.1.0
+     */
+    private static function value(Form $form, string $name, $value): string
+    {
+        $options = self::options($form, $name);
+        $chosen  = [];
+
+        foreach (\is_array($value) ? $value : [$value] as $one) {
+            $one = trim((string) $one);
+
+            if ($one === '') {
+                continue;
+            }
+
+            $chosen[] = $options[$one] ?? $one;
+        }
+
+        return implode(', ', $chosen);
+    }
+
+    /**
+     * The wording of every option of a field, by value, read out of the form itself.
+     *
+     * Out of the form and not out of the field: the options of a field are in its element, and
+     * FormField hands that out to nobody - __get() answers for a list of properties and element is
+     * not one of them. The name is checked against the same pattern an extra field has to match
+     * before it goes into the xpath.
+     *
+     * @param   Form    $form  The form the field belongs to.
+     * @param   string  $name  The name of the field.
+     *
+     * @return  array<string, string>
+     *
+     * @since   1.1.0
+     */
+    private static function options(Form $form, string $name): array
+    {
+        if (!preg_match('/^[a-zA-Z][a-zA-Z0-9_]*$/', $name)) {
+            return [];
+        }
+
+        $options = [];
+
+        foreach ($form->getXml()->xpath('//field[@name="' . $name . '"]/option') as $option) {
+            $text = trim((string) $option);
+
+            $options[(string) $option['value']] = $text === '' ? (string) $option['value'] : Text::_($text);
+        }
+
+        return $options;
     }
 
     /**

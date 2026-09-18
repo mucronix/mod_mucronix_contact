@@ -1608,10 +1608,11 @@ class MucronixContactHelper implements DatabaseAwareInterface
                 continue;
             }
 
-            // maxlength only reaches the browser, and the server checks everything again
-            $maxLength = (int) $field->getAttribute('maxlength', 0);
+            // maxlength only reaches the browser, and the server checks everything again. A field that
+            // sends an array - a checkbox list - has no length to measure and is left to its own rule
+            $maxLength = \is_string($value) ? (int) $field->getAttribute('maxlength', 0) : 0;
 
-            if ($maxLength > 0 && mb_strlen((string) $value) > $maxLength) {
+            if ($maxLength > 0 && mb_strlen($value) > $maxLength) {
                 $errors[$field->fieldname] = Text::_('MOD_MUCRONIX_CONTACT_ERROR_TOO_LONG');
             }
         }
