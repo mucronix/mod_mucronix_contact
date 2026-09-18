@@ -420,6 +420,11 @@ class MucronixContactHelper implements DatabaseAwareInterface
             $classes[] = 'mcx--form-framed';
         }
 
+        // A background needs the same room inside as a frame, and css cannot ask whether a variable is set
+        if ($this->getLookColour($params, 'form_bg') !== '') {
+            $classes[] = 'mcx--form-bg';
+        }
+
         if ($this->getLookChoice($params, 'button_look', ['theme', 'own']) === 'own') {
             $classes[] = 'mcx--button-own';
         }
@@ -476,7 +481,25 @@ class MucronixContactHelper implements DatabaseAwareInterface
             $declarations[] = $name . ': ' . $value . ';';
         }
 
-        return '#mcx-' . $moduleId . ' { ' . implode(' ', $declarations) . ' }';
+        $css = '#mcx-' . $moduleId . ' { ' . implode(' ', $declarations) . ' }';
+
+        /*
+         * The width is the one value that belongs to more than the form. A title of the module stands
+         * above it, inside the container the template wraps the module in, and a form narrowed alone
+         * would sit under a title running the full width. That container has no name we could write
+         * into a stylesheet, so it is addressed here, by what it holds: the element whose direct child
+         * is this instance. :where() keeps the whole thing at no weight at all, so a template and
+         * Custom CSS both win over it.
+         *
+         * With the module chrome of the template that container holds this module alone. Should a
+         * template put several modules in one element, that element is what narrows, and the rule on
+         * .mcx above still keeps the form itself right; the file of styling notes says what to do then.
+         */
+        if (isset($variables['--mcx-form-max'])) {
+            $css .= ' :where(:has(> #mcx-' . $moduleId . ')) { max-width: ' . $variables['--mcx-form-max'] . '; }';
+        }
+
+        return $css;
     }
 
     /**

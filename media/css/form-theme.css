@@ -44,7 +44,8 @@
 }
 
 /* A single line under the field. The other three sides are set to nothing rather than left alone,
-   or a template that draws a box would keep it */
+   or a template that draws a box would keep it. The corners are square and the Corner Radius
+   parameter is hidden with this look: rounding a single line bends it away from the text above it */
 .mcx.mcx--fields-line .form-control,
 .mcx.mcx--fields-line .form-select,
 .mcx.mcx--fields-line .uk-input,
@@ -52,7 +53,7 @@
 .mcx.mcx--fields-line .uk-select {
     border: 0 solid var(--mcx-field-border, #dddddd);
     border-bottom-width: 1px;
-    border-radius: var(--mcx-field-radius, 4px);
+    border-radius: 0;
 }
 
 /*
@@ -84,9 +85,14 @@
  * A ticked box in the accent colour, on templates that draw their checkboxes themselves - Bootstrap
  * and Cassiopeia paint the box with a background, which accent-color in form-base.css cannot reach.
  * Only the colour changes; the tick and the shape stay the template's.
+ *
+ * Not with the field look "As in Template": there the module draws no field of its own, and a
+ * checkbox in someone else's colour would be the one thing that gave it away.
  */
-.mcx .mcx-field .form-check-input:checked,
-.mcx .mcx-field .uk-checkbox:checked {
+.mcx.mcx--fields-box .form-check-input:checked,
+.mcx.mcx--fields-box .uk-checkbox:checked,
+.mcx.mcx--fields-line .form-check-input:checked,
+.mcx.mcx--fields-line .uk-checkbox:checked {
     background-color: var(--mcx-accent, #2f6fbf);
     border-color: var(--mcx-accent, #2f6fbf);
 }
@@ -95,15 +101,27 @@
  * The rest of the look sits in :where(), so it weighs nothing: the Wrapper Class of a template - a
  * card, for one - and Custom CSS win over it without trying.
  */
+/*
+ * The width belongs to the whole module - the title above the form is part of it - and the element
+ * holding both is the module container of the template, which this file cannot name. So the width
+ * arrives as a second inline rule beside the variables, :where(:has(> #mcx-<id>)), and this one
+ * keeps the form itself in step wherever that container is shared with other modules.
+ */
 :where(.mcx) {
     background-color: var(--mcx-form-bg, transparent);
     max-width: var(--mcx-form-max, none);
 }
 
+/* Room inside, for a frame and for a background alike: fields flat against the edge of a colour
+   look like a mistake, and only the module knows there is a colour there at all */
+:where(.mcx.mcx--form-framed),
+:where(.mcx.mcx--form-bg) {
+    padding: 16px 20px;
+}
+
 :where(.mcx.mcx--form-framed) {
     border: 1px solid var(--mcx-field-border, #dddddd);
     border-radius: var(--mcx-field-radius, 4px);
-    padding: 16px 20px;
 }
 
 /*

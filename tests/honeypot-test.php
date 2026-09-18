@@ -1305,8 +1305,17 @@ function lookOnPage(array $form, string $style, array &$wrong): array
         $wrong[] = 'no wrapper with id mcx-' . $id . ' on the page';
     }
 
-    $rules     = preg_match_all('/<style\b[^>]*>\s*#mcx-' . $id . '\s*\{([^}]*)\}\s*<\/style>/', $html, $found, PREG_OFFSET_CAPTURE);
+    /*
+     * Only the block the module prints for this instance, which begins with the rule on its id. The
+     * Custom CSS of the site owner is an inline style of its own and may hold anything at all; it is
+     * not this case's to judge.
+     */
+    preg_match_all('/<style\b[^>]*>(\s*#mcx-' . $id . '\s*\{.*?)<\/style>/s', $html, $blocks, PREG_OFFSET_CAPTURE);
+
+    $rules     = preg_match_all('/#mcx-' . $id . '\s*\{([^}]*)\}/', implode('', array_column($blocks[1], 0)), $found);
+    $widths    = preg_match_all('/:where\(:has\(> #mcx-' . $id . '\)\)\s*\{\s*max-width:\s*([^;}]+);?\s*\}/', implode('', array_column($blocks[1], 0)), $widthRules);
     $variables = [];
+    $values    = [];
 
     if ($style !== 'full') {
         if ($modifiers !== []) {
@@ -1315,6 +1324,10 @@ function lookOnPage(array $form, string $style, array &$wrong): array
 
         if ($rules > 0) {
             $wrong[] = 'a rule with variables for #mcx-' . $id . ' is printed outside "Full"';
+        }
+
+        if ($widths > 0) {
+            $wrong[] = 'the width rule for the module block is printed outside "Full"';
         }
 
         return [$modifiers, $variables];
@@ -1327,7 +1340,7 @@ function lookOnPage(array $form, string $style, array &$wrong): array
             . ($modifiers ? implode(' ', $modifiers) : 'none');
     }
 
-    foreach (array_diff($modifiers, ['mcx--fields-box', 'mcx--fields-line', 'mcx--fields-theme', 'mcx--form-framed', 'mcx--button-own']) as $unknown) {
+    foreach (array_diff($modifiers, ['mcx--fields-box', 'mcx--fields-line', 'mcx--fields-theme', 'mcx--form-framed', 'mcx--form-bg', 'mcx--button-own']) as $unknown) {
         $wrong[] = 'unknown modifier on the wrapper: ' . $unknown;
     }
 
@@ -1335,7 +1348,15 @@ function lookOnPage(array $form, string $style, array &$wrong): array
         $wrong[] = 'the rule with variables for #mcx-' . $id . ' is printed ' . $rules . ' times';
     }
 
+    if ($widths > 1) {
+        $wrong[] = 'the width rule for the module block is printed ' . $widths . ' times';
+    }
+
     if ($rules === 0) {
+        if ($widths > 0) {
+            $wrong[] = 'the width rule is printed with no variables beside it';
+        }
+
         return [$modifiers, $variables];
     }
 
@@ -1349,9 +1370,10 @@ function lookOnPage(array $form, string $style, array &$wrong): array
         '--mcx-accent'       => ['/^#[0-9a-f]{6}$/', '#2f6fbf'],
     ];
 
-    foreach (array_filter(array_map('trim', explode(';', $found[1][0][0]))) as $declaration) {
+    foreach (array_filter(array_map('trim', explode(';', $found[1][0]))) as $declaration) {
         [$name, $value] = array_map('trim', explode(':', $declaration, 2) + [1 => '']);
         $variables[]    = $name . ': ' . $value;
+        $values[$name]  = $value;
 
         if (!isset($known[$name])) {
             $wrong[] = 'unknown variable in the rule: ' . $name;
@@ -1364,8 +1386,27 @@ function lookOnPage(array $form, string $style, array &$wrong): array
 
     $theme = preg_match('/<link\b[^>]*mod_mucronix_contact\/css\/form-theme(?:\.min)?\.css/', $html, $link, PREG_OFFSET_CAPTURE);
 
-    if ($theme && $found[0][0][1] < $link[0][1]) {
+    if ($theme && $blocks[0][0][1] < $link[0][1]) {
         $wrong[] = 'the rule with variables comes before form-theme.css';
+    }
+
+    /*
+     * The width of the module block. It goes with --mcx-form-max and says the same: a form narrowed
+     * on its own would stand under a title running the whole width, and a block narrowed while the
+     * form is not would leave the form hanging over its own edge.
+     */
+    $width = $values['--mcx-form-max'] ?? '';
+
+    if ($width !== '' && $widths === 0) {
+        $wrong[] = '--mcx-form-max is printed but the module block is not narrowed with it';
+    }
+
+    if ($width === '' && $widths > 0) {
+        $wrong[] = 'the module block is narrowed while --mcx-form-max is not printed';
+    }
+
+    if ($width !== '' && $widths === 1 && trim($widthRules[1][0]) !== $width) {
+        $wrong[] = 'the module block is narrowed to ' . trim($widthRules[1][0]) . ', the form to ' . $width;
     }
 
     return [$modifiers, $variables];

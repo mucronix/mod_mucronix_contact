@@ -421,7 +421,7 @@
 					min="0"
 					max="30"
 					filter="integer"
-					showon="style_mode:full[AND]field_look!:theme"
+					showon="style_mode:full[AND]field_look:box"
 				/>
 
 				<field
