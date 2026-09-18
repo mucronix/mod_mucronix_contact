@@ -43,6 +43,7 @@
 		<downloads>
 			<downloadurl type="full" format="zip">https://github.com/mucronix/mod_mucronix_contact/releases/download/v1.1.0/mod_mucronix_contact-1.1.0.zip</downloadurl>
 		</downloads>
+		<sha256>f6718f3c6c550ee37f4c13654c336d5cc6b79048285e323b56df2f913d94d011</sha256>
 		<changelogurl>https://github.com/mucronix/mod_mucronix_contact/releases</changelogurl>
 		<tags>
 			<tag>stable</tag>
