@@ -161,6 +161,9 @@ The email always goes first and is never held up by the chat. If Telegram refuse
 answer, the visitor still sees the message go through and the reason is written to the module log.
 So check the log when the chat stays quiet.
 
+The token field carries `autocomplete="new-password"`, so that the browser's password manager does
+not drop a saved login into the fields of the settings form.
+
 > ⚠️ **The bot token is stored in the database as plain text** and stands in the page source of the
 > module settings for anyone who can open this module for editing. Joomla keeps its own SMTP and
 > database passwords the same way; there is no reversible encryption for settings in the core, and
