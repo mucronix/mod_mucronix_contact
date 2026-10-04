@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mucronix Contact — пояснення до додаткових полів</title>
+<style>
+    :root { color-scheme: light dark; }
+    body {
+        margin: 0 auto; padding: 24px 20px 64px; max-width: 860px;
+        font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        color: #1c1c1c; background: #ffffff;
+    }
+    h1 { font-size: 26px; margin: 0 0 8px; }
+    h2 { font-size: 20px; margin: 36px 0 8px; padding-top: 16px; border-top: 1px solid #e2e2e2; }
+    h3 { font-size: 16px; margin: 22px 0 4px; }
+    p, li { margin: 8px 0; }
+    code { font-family: ui-monospace, Consolas, monospace; font-size: 14px; background: #f2f4f7; padding: 1px 5px; border-radius: 3px; }
+    pre { background: #f2f4f7; border-left: 3px solid #2f6fbf; padding: 12px 14px; overflow-x: auto; border-radius: 4px; }
+    pre code { background: none; padding: 0; }
+    .lead { color: #444444; }
+    .ui { font-weight: 600; }
+    .note { background: #fff8e5; border-left: 4px solid #b8860b; padding: 10px 14px; border-radius: 4px; }
+    dt { margin-top: 14px; font-style: italic; }
+    dd { margin: 4px 0 0 18px; }
+    @media (prefers-color-scheme: dark) {
+        body { color: #e8e8e8; background: #1b1c1e; }
+        h2 { border-top-color: #333333; }
+        code, pre { background: #26282b; }
+        .lead { color: #b6b6b6; }
+        .note { background: #332b13; }
+    }
+</style>
+</head>
+<body>
+
+<h1>Пояснення до додаткових полів</h1>
+<p class="lead">Вкладка <span class="ui">Додаткові поля</span> — єдине місце в модулі, де розмітку
+пишуть власноруч. Нижче — готовий приклад на кожен тип поля, набір для типової форми і все, що
+модуль відхиляє, разом із причинами.</p>
+
+<h2>Як це влаштовано</h2>
+<ul>
+    <li>Поля описують у полі <span class="ui">Опис полів</span>, у форматі форм Joomla: один елемент
+    <code>&lt;field&gt;</code> на кожне поле. Загортати їх у <code>&lt;form&gt;</code> чи
+    <code>&lt;fieldset&gt;</code> не треба — просто пишіть поля одне за одним.</li>
+    <li>На сторінці вони стають після полів модуля, перед CAPTCHA, у тому порядку, в якому описані.
+    До листа й до Telegram потрапляють так само, за порядком.</li>
+    <li>Кожному полю потрібні три речі: ім'я <code>name</code>, тип <code>type</code> і підпис
+    <code>label</code>. Ім'я пишеться латинкою, відвідувач його не бачить; підпис — мовою сайту.</li>
+    <li><code>required="true"</code> робить поле обов'язковим.</li>
+    <li>Зберігши модуль, відкрийте сторінку з формою, не виходячи з адмінки. Якщо щось відхилено,
+    над формою з'явиться повідомлення з причиною. Його бачать лише ті, хто може керувати модулями;
+    відвідувач бачить форму як завжди. Що означає кожне повідомлення — у пункті 6.</li>
+</ul>
+<p class="note"><b>Що перевіряє сервер, а що лише браузер.</b> Атрибути <code>pattern</code>,
+<code>maxlength</code>, <code>min</code> і <code>max</code> самі собою діють тільки в браузері:
+це підказка відвідувачеві, а не захист. Перевірку на сервері вмикає атрибут <code>validate</code> —
+у прикладах нижче він стоїть там, де потрібен.</p>
+
+<h2>1. Одинадцять типів</h2>
+<p>Кожен приклад можна вставити як є. Підпис і варіанти замініть своїми, ім'я — якщо хочете.</p>
+
+<h3><code>text</code> — рядок</h3>
+<pre><code>&lt;field name="company" type="text" label="Компанія" maxlength="100" /&gt;</code></pre>
+
+<h3><code>textarea</code> — кілька рядків</h3>
+<pre><code>&lt;field name="address" type="textarea" label="Адреса доставки" rows="3" /&gt;</code></pre>
+
+<h3><code>email</code> — ще одна адреса</h3>
+<pre><code>&lt;field name="email_extra" type="email" label="Запасний e-mail" validate="email" /&gt;</code></pre>
+<p>Без <code>validate="email"</code> адресу перевірить лише браузер. Основне поле електронної
+адреси модуль має своє, заводити його тут не треба.</p>
+
+<h3><code>tel</code> — телефон</h3>
+<pre><code>&lt;field name="phone" type="tel" label="Телефон" inputmode="tel" validate="tel" /&gt;</code></pre>
+<p><code>validate="tel"</code> приймає від 7 до 15 цифр; плюс, пробіли, крапки, дефіси й дужки
+між ними дозволені. <code>inputmode="tel"</code> відкриває на телефоні цифрову клавіатуру:
+саме поле Joomla виводить звичайним рядком.</p>
+
+<h3><code>url</code> — адреса сайту</h3>
+<pre><code>&lt;field name="website" type="url" label="Ваш сайт" hint="https://" validate="url" /&gt;</code></pre>
+<p>Адреса приймається тільки разом із <code>https://</code> або <code>http://</code>: саме
+<code>example.com</code> буде відхилено, тож підказка в полі не зайва.</p>
+
+<h3><code>number</code> — число</h3>
+<pre><code>&lt;field name="guests" type="number" label="Скільки гостей" min="1" max="20" step="1" validate="number" /&gt;</code></pre>
+<p>З <code>validate="number"</code> меж <code>min</code> і <code>max</code> дотримується й сервер.</p>
+
+<h3><code>list</code> — випадний список</h3>
+<pre><code>&lt;field name="topic" type="list" label="Тема звернення" validate="options"&gt;
+    &lt;option value=""&gt;— оберіть —&lt;/option&gt;
+    &lt;option value="question"&gt;Запитання&lt;/option&gt;
+    &lt;option value="order"&gt;Замовлення&lt;/option&gt;
+    &lt;option value="other"&gt;Інше&lt;/option&gt;
+&lt;/field&gt;</code></pre>
+<p>У листі приходить текст варіанта («Замовлення»), а не його значення (<code>order</code>). Перший
+рядок із порожнім значенням потрібен, щоб обов'язковий список не можна було надіслати необраним.</p>
+
+<h3><code>radio</code> — один варіант із кількох</h3>
+<pre><code>&lt;field name="reply_by" type="radio" label="Як вам відповісти" default="mail" validate="options"&gt;
+    &lt;option value="mail"&gt;Листом&lt;/option&gt;
+    &lt;option value="call"&gt;Дзвінком&lt;/option&gt;
+&lt;/field&gt;</code></pre>
+<p>Варіанти обов'язкові: без них на сторінці лишиться підпис без самого перемикача.</p>
+
+<h3><code>checkbox</code> — одна позначка</h3>
+<pre><code>&lt;field name="callback" type="checkbox" label="Передзвоніть мені" value="1" /&gt;</code></pre>
+<p>У листі приходить «Так» або «Ні». Обов'язкова позначка до листа не потрапляє зовсім: без неї
+форму не надіслати, отже, відповідь завжди та сама.</p>
+
+<h3><code>checkboxes</code> — кілька позначок</h3>
+<pre><code>&lt;field name="interests" type="checkboxes" label="Що вас цікавить"&gt;
+    &lt;option value="price"&gt;Ціни&lt;/option&gt;
+    &lt;option value="terms"&gt;Терміни&lt;/option&gt;
+    &lt;option value="demo"&gt;Показ&lt;/option&gt;
+&lt;/field&gt;</code></pre>
+<p>У листі приходять підписи позначених варіантів через кому.</p>
+
+<h3><code>calendar</code> — дата</h3>
+<pre><code>&lt;field name="visit_date" type="calendar" label="Зручна дата" /&gt;</code></pre>
+<p>Дата приходить у вигляді <code>2026-10-15</code>.</p>
+
+<h2>2. Готовий набір для типової форми</h2>
+<p>Телефон, тема звернення, зручний час і згода на розсилку. Вставляється цілком і працює одразу.</p>
+<pre><code>&lt;field name="phone" type="tel" label="Телефон" hint="+380 44 123-45-67"
+    pattern="[0-9+\(\) \-]{7,20}" inputmode="tel" validate="tel" required="true" /&gt;
+
+&lt;field name="topic" type="list" label="Тема звернення" required="true" validate="options"&gt;
+    &lt;option value=""&gt;— оберіть —&lt;/option&gt;
+    &lt;option value="question"&gt;Запитання&lt;/option&gt;
+    &lt;option value="order"&gt;Замовлення&lt;/option&gt;
+    &lt;option value="other"&gt;Інше&lt;/option&gt;
+&lt;/field&gt;
+
+&lt;field name="call_time" type="radio" label="Коли вам зручно говорити" default="any" validate="options"&gt;
+    &lt;option value="any"&gt;Будь-коли&lt;/option&gt;
+    &lt;option value="morning"&gt;До обіду&lt;/option&gt;
+    &lt;option value="evening"&gt;Після обіду&lt;/option&gt;
+&lt;/field&gt;
+
+&lt;field name="newsletter" type="checkbox" label="Надсилайте мені новини" value="1" /&gt;</code></pre>
+<ul>
+    <li><code>pattern</code> у телефона не дає надіслати літери просто в браузері, не чекаючи
+    відповіді сервера. Дужки й дефіс усередині квадратних дужок написано зі зворотною рискою
+    навмисно: без неї браузер мовчки відкидає весь шаблон і пропускає що завгодно.</li>
+    <li>Згода на розсилку — <b>необов'язкова</b> позначка, окрема від згоди на обробку даних.
+    У листі буде «Так» або «Ні»: ви бачите, хто погодився. Зробите її обов'язковою — змусите
+    погоджуватися всіх і перестанете бачити відповідь у листі.</li>
+    <li>Згоду на обробку даних сюди не додавайте: модуль має свою, параметр
+    <span class="ui">Чекбокс згоди</span> на вкладці «Поля».</li>
+</ul>
+<p><b>Як перевірити:</b> надішліть форму без телефону й без теми — обидва поля мають підсвітитися,
+кожне зі своїм повідомленням. Потім заповніть і надішліть: у листі тема приходить словом
+«Замовлення», а не <code>order</code>.</p>
+
+<h2>3. Зайняті імена</h2>
+<p>Вісім імен належать самому модулю, і поле з таким іменем пропускається:</p>
+<p><code>name</code>, <code>email</code>, <code>message</code>, <code>attachment</code>,
+<code>consent</code>, <code>captcha</code>, <code>mcx_hp</code>, <code>mcx_module_id</code>.</p>
+<p>Регістр не має значення: <code>Email</code> і <code>CAPTCHA</code> зайняті так само.</p>
+<p>Причина: зустрівши друге поле з тим самим іменем, Joomla не додає його, а <b>ставить на місце
+першого</b> — і нічого про це не каже. Найгірше з <code>captcha</code>: на місці перевірки
+опинилося б звичайне текстове поле, яке влаштовує будь-яке значення, а форма й далі вважала б себе
+захищеною. З <code>mcx_hp</code> те саме стається з пасткою для роботів.</p>
+<p>Потрібна друга адреса чи друге повідомлення — назвіть поле інакше: <code>email_extra</code>,
+<code>details</code>. Потрібен файл — увімкніть <span class="ui">Поле вкладення</span> на вкладці «Поля».</p>
+<p>Два додаткові поля з одним іменем теж не вживаються: лишається перше.</p>
+
+<h2>4. Атрибути, які модуль знімає</h2>
+<p>Саме поле при цьому лишається і працює, зникає тільки атрибут — а над формою з'являється
+повідомлення про те, який саме.</p>
+<ul>
+    <li><code>id</code> — ідентифікатор Joomla будує з імені сама. Заданий вручну, він обходить
+    список зайнятих імен: поле з будь-яким іменем і <code>id="mcx_hp"</code> виштовхує пастку для
+    роботів зі сторінки, і захист зникає без жодної ознаки.</li>
+    <li><code>layout</code>, <code>layoutIncludePath</code> — підміняють файл, що малює поле, файлом,
+    названим у налаштуванні.</li>
+    <li><code>fieldset</code>, <code>formsource</code> — переносять поле в інше місце сторінки або
+    підтягують сторонній опис форми.</li>
+    <li><code>addfieldprefix</code>, <code>addformprefix</code>, <code>addruleprefix</code>,
+    <code>addfilterprefix</code>, <code>addfieldpath</code>, <code>addformpath</code>,
+    <code>addrulepath</code>, <code>addfilterpath</code> — вирішують, який саме код стоїть за словом
+    у <code>type</code>. З ними список дозволених типів втрачає сенс цілком: в описі й далі написано
+    <code>text</code>, а працює вже чужий клас — до того ж для всіх форм, що будуються на сторінці
+    після цієї.</li>
+</ul>
+<p>Звичайній формі жоден із цих атрибутів не потрібен.</p>
+
+<h2>5. Яким може бути ім'я</h2>
+<p>Перша — латинська літера, далі латинські літери, цифри й підкреслення:
+<code>^[a-zA-Z][a-zA-Z0-9_]*$</code>.</p>
+<p>Годяться <code>phone</code>, <code>call_time</code>, <code>phone2</code>. Не годяться
+<code>call-time</code>, <code>call.time</code>, <code>2phone</code>, <code>телефон</code>.</p>
+<p>Дефіс і крапку заборонено не через суворість. Ідентифікатор поля на сторінці Joomla робить
+з імені, замінюючи все, крім літер, цифр і підкреслення, на підкреслення. Поля
+<code>call-time</code>, <code>call.time</code> і <code>call_time</code> дістали б один і той самий
+ідентифікатор, і на сторінці лишилося б одне з трьох — мовчки.</p>
+
+<h2>6. Як читати попередження</h2>
+<p>Усі вони виводяться над формою й починаються словами «Додаткові поля». Надсиланню форми вони
+не заважають: пропущене поле просто не виводиться, решта працює.</p>
+<dl>
+    <dt><span class="ui">Додаткові поля: опис не вдалося розібрати, тому жодного поля не додано.</span></dt>
+    <dd>Помилка в самому записі: незакритий тег, загублені лапки, пропущена коса риска наприкінці
+    <code>/&gt;</code>. Далі в повідомленні названо рядок і причину — лагодити треба саме цей рядок.
+    Поки його не виправлено, не додається <b>жодне</b> поле, навіть правильно описані.</dd>
+
+    <dt><span class="ui">Додаткові поля: в описі немає жодного елемента field, тому нічого не додано.</span></dt>
+    <dd>Запис читається, але полів у ньому немає. Зазвичай це одруківка в слові <code>field</code>
+    або текст, що лишився замість опису.</dd>
+
+    <dt><span class="ui">Додаткові поля: поле без імені пропущено.</span></dt>
+    <dd>Допишіть полю <code>name</code>.</dd>
+
+    <dt><span class="ui">Додаткові поля: ім'я … відхилено, поле пропущено.</span></dt>
+    <dd>В імені є щось, крім латинських літер, цифр і підкреслення, або воно починається не з літери.
+    Див. пункт 5.</dd>
+
+    <dt><span class="ui">Додаткові поля: ім'я … зайняте модулем, поле пропущено.</span></dt>
+    <dd>Ім'я зі списку в пункті 3. Назвіть поле інакше.</dd>
+
+    <dt><span class="ui">Додаткові поля: ім'я … трапляється кілька разів, залишено лише перше поле.</span></dt>
+    <dd>Два поля з одним іменем. Перейменуйте друге.</dd>
+
+    <dt><span class="ui">Додаткові поля: у поля … немає типу, його пропущено.</span></dt>
+    <dd>Допишіть полю <code>type</code> — один з одинадцяти з пункту 1.</dd>
+
+    <dt><span class="ui">Додаткові поля: поле … пропущено, тип … тут не приймається.</span></dt>
+    <dd>Тип не з одинадцяти. Перевірте написання — <code>checkboxes</code>, а не
+    <code>checkbox-list</code>, — і зазирніть у пункт 7: можливо, цей тип не приймається навмисно.</dd>
+
+    <dt><span class="ui">Додаткові поля: у поля … вилучено атрибут ….</span></dt>
+    <dd>Поле працює, знято лише названий атрибут. Приберіть його з опису, і повідомлення зникне.
+    Див. пункт 4.</dd>
+</dl>
+<p>Ті самі причини, одним рядком і англійською, потрапляють до журналу
+<code>administrator/logs/mod_mucronix_contact.php</code> — за кожного надсилання форми, доки опис
+не виправлено.</p>
+
+<h2>7. Чого тут не буде ніколи</h2>
+<p>Типів полів у Joomla значно більше, ніж одинадцять. Ці сім не приймаються навмисно:</p>
+<ul>
+    <li><code>sql</code> — виконує запит, записаний у його атрибуті, і показує відповідь бази даних
+    на сторінці. Право редагувати модуль перетворилося б на право читати таблиці.</li>
+    <li><code>user</code> — виносить на відкриту сторінку вибір користувача з адмінки.</li>
+    <li><code>file</code> — відкриває друге завантаження файлів в обхід перевірок першого. Для файлу
+    є <span class="ui">Поле вкладення</span>.</li>
+    <li><code>subform</code> — будує поля всередині поля; перевірки імен, типів та атрибутів до них
+    не дістають.</li>
+    <li><code>editor</code> — тягне на відкриту сторінку редактор з адмінки з усіма його кнопками.</li>
+    <li><code>accessiblemedia</code> — те саме з вибором зображень із медіаменеджера.</li>
+    <li><code>hidden</code> — кладе в повідомлення значення, якого відвідувач не вводив і не бачив.</li>
+</ul>
+<p>Телефон, список, дата, позначки — усе, що потрібно формі зворотного зв'язку, одинадцять типів
+покривають. Якщо бракує саме поля з цього списку, потрібен конструктор форм, а не цей модуль.</p>
+
+</body>
+</html>

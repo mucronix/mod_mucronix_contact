@@ -41,6 +41,22 @@ class StylingdocsField extends FormField
     protected $type = 'Stylingdocs';
 
     /**
+     * The first part of the file name of the notes, media/mod_mucronix_contact/docs/<page>.<tag>.html.
+     *
+     * @var    string
+     * @since  1.2.0
+     */
+    protected $page = 'styling';
+
+    /**
+     * The language key of the wording on the button.
+     *
+     * @var    string
+     * @since  1.2.0
+     */
+    protected $button = 'MOD_MUCRONIX_CONTACT_FIELD_STYLING_DOCS_BUTTON';
+
+    /**
      * Returns the button, an ordinary link opening the notes in a new tab.
      *
      * No onclick and no script: a link is all this needs, and the administration has enough of both.
@@ -51,12 +67,12 @@ class StylingdocsField extends FormField
      */
     protected function getInput()
     {
-        $file = 'styling.' . $this->getLanguageTag() . '.html';
+        $file = $this->page . '.' . $this->getLanguageTag() . '.html';
 
         return '<a class="btn btn-secondary" href="'
             . htmlspecialchars(Uri::root(true) . '/media/mod_mucronix_contact/docs/' . $file, ENT_QUOTES, 'UTF-8')
             . '" target="_blank" rel="noopener">'
-            . Text::_('MOD_MUCRONIX_CONTACT_FIELD_STYLING_DOCS_BUTTON')
+            . Text::_($this->button)
             . '</a>';
     }
 
@@ -72,6 +88,6 @@ class StylingdocsField extends FormField
     {
         $tag = Factory::getApplication()->getLanguage()->getTag();
 
-        return is_file(JPATH_SITE . '/media/mod_mucronix_contact/docs/styling.' . $tag . '.html') ? $tag : 'en-GB';
+        return is_file(JPATH_SITE . '/media/mod_mucronix_contact/docs/' . $this->page . '.' . $tag . '.html') ? $tag : 'en-GB';
     }
 }

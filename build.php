@@ -65,7 +65,7 @@ function checkVersions(string $root): array
     // The address in the manifest has to be the one the update file is actually published at
     $server = (string) $manifest->updateservers->server;
 
-    if ($server !== 'https://mucronix.com/updates/mod_mucronix_contact.xml') {
+    if ($server !== 'https://raw.githubusercontent.com/mucronix/mod_mucronix_contact/main/update/mod_mucronix_contact.xml') {
         $wrong[] = "the update server address is unexpected: $server";
     }
 
@@ -87,6 +87,8 @@ $files = [
     'layouts/mucronix/form/field/file.php',
     'src/Dispatcher/Dispatcher.php',
     'src/Field/CustomcssField.php',
+    'src/Field/ExtrafieldsdocsField.php',
+    'src/Field/ModuleversionField.php',
     'src/Field/StylingdocsField.php',
     'src/Helper/MailSender.php',
     'src/Helper/MessageFields.php',
@@ -97,6 +99,9 @@ $files = [
     'media/joomla.asset.json',
     'media/css/form-base.css',
     'media/css/form-theme.css',
+    'media/docs/extra-fields.en-GB.html',
+    'media/docs/extra-fields.ru-RU.html',
+    'media/docs/extra-fields.uk-UA.html',
     'media/docs/styling.en-GB.html',
     'media/docs/styling.ru-RU.html',
     'media/docs/styling.uk-UA.html',

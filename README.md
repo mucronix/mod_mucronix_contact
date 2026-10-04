@@ -90,6 +90,12 @@ people who can manage modules — visitors see the form as usual.
 A `radio` field must be written with its options. The core layout for a switcher returns nothing at
 all when the option list is empty, and you get a label with no control under it.
 
+**Open the notes on extra fields** is a button on the same tab. It opens a page with a ready-made
+example for each of the eleven types, a set for a typical form, the names and attributes that are
+refused with the reason for each, and what every notice means. The page ships with the module, one
+per language, at `media/mod_mucronix_contact/docs/extra-fields.<language>.html`. It is not repeated
+here.
+
 ---
 
 ## Telegram

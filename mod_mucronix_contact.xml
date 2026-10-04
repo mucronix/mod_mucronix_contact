@@ -7,7 +7,7 @@
 	<license>GNU General Public License version 2 or later; see LICENSE</license>
 	<authorEmail>support@mucronix.com</authorEmail>
 	<authorUrl>https://mucronix.com</authorUrl>
-	<version>1.1.1</version>
+	<version>1.2.0</version>
 	<description>MOD_MUCRONIX_CONTACT_XML_DESCRIPTION</description>
 	<scriptfile>script.php</scriptfile>
 	<namespace path="src">Mucronix\Module\MucronixContact</namespace>
@@ -28,7 +28,8 @@
 	<media destination="mod_mucronix_contact" folder="media">
 		<filename>joomla.asset.json</filename>
 		<folder>css</folder>
-		<!-- The styling notes, one page per language, opened by the button on the Appearance tab -->
+		<!-- The notes, one page per language: on styling, opened by the button on the Appearance
+		     tab, and on extra fields, opened by the button on the Extra Fields tab -->
 		<folder>docs</folder>
 		<folder>js</folder>
 	</media>
@@ -41,11 +42,21 @@
 		<language tag="uk-UA">language/uk-UA/mod_mucronix_contact.sys.ini</language>
 	</languages>
 	<updateservers>
-		<server type="extension" priority="1" name="Mucronix Contact">https://mucronix.com/updates/mod_mucronix_contact.xml</server>
+		<server type="extension" priority="1" name="Mucronix Contact">https://raw.githubusercontent.com/mucronix/mod_mucronix_contact/main/update/mod_mucronix_contact.xml</server>
 	</updateservers>
 	<config>
 		<fields name="params">
-			<fieldset name="basic">
+			<!-- The prefix is how a field type of our own is found: FormHelper::loadClass() puts the
+			     type with its first letter raised and "Field" after it behind this namespace. -->
+			<fieldset name="basic" addfieldprefix="Mucronix\Module\MucronixContact\Site\Field">
+				<!-- First on the Module tab: the name and the installed version, read from the record
+				     of the extension in the database. Nothing is submitted and nothing is saved. -->
+				<field
+					name="module_version"
+					type="moduleversion"
+					label="MOD_MUCRONIX_CONTACT_FIELD_MODULE_VERSION_LABEL"
+				/>
+
 				<field
 					name="recipient"
 					type="text"
@@ -337,7 +348,7 @@
 				</field>
 			</fieldset>
 
-			<fieldset name="extrafields" label="MOD_MUCRONIX_CONTACT_FIELDSET_EXTRAFIELDS_LABEL">
+			<fieldset name="extrafields" label="MOD_MUCRONIX_CONTACT_FIELDSET_EXTRAFIELDS_LABEL" addfieldprefix="Mucronix\Module\MucronixContact\Site\Field">
 				<field
 					name="extra_fields"
 					type="textarea"
@@ -346,10 +357,15 @@
 					rows="10"
 					filter="raw"
 				/>
+
+				<field
+					name="extra_fields_docs"
+					type="extrafieldsdocs"
+					label="MOD_MUCRONIX_CONTACT_FIELD_EXTRA_FIELDS_DOCS_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_EXTRA_FIELDS_DOCS_DESC"
+				/>
 			</fieldset>
 
-			<!-- The prefix is how a field type of our own is found: FormHelper::loadClass() puts the
-			     type with its first letter raised and "Field" after it behind this namespace. -->
 			<fieldset name="appearance" label="MOD_MUCRONIX_CONTACT_FIELDSET_APPEARANCE_LABEL" addfieldprefix="Mucronix\Module\MucronixContact\Site\Field">
 				<!-- Classes are added to what the core layouts print, never taken away. The table
 				     of classes lives in the helper, MARKUP_CLASSES. -->

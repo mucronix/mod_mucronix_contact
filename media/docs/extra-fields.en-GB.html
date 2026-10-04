@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mucronix Contact — notes on extra fields</title>
+<style>
+    :root { color-scheme: light dark; }
+    body {
+        margin: 0 auto; padding: 24px 20px 64px; max-width: 860px;
+        font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        color: #1c1c1c; background: #ffffff;
+    }
+    h1 { font-size: 26px; margin: 0 0 8px; }
+    h2 { font-size: 20px; margin: 36px 0 8px; padding-top: 16px; border-top: 1px solid #e2e2e2; }
+    h3 { font-size: 16px; margin: 22px 0 4px; }
+    p, li { margin: 8px 0; }
+    code { font-family: ui-monospace, Consolas, monospace; font-size: 14px; background: #f2f4f7; padding: 1px 5px; border-radius: 3px; }
+    pre { background: #f2f4f7; border-left: 3px solid #2f6fbf; padding: 12px 14px; overflow-x: auto; border-radius: 4px; }
+    pre code { background: none; padding: 0; }
+    .lead { color: #444444; }
+    .ui { font-weight: 600; }
+    .note { background: #fff8e5; border-left: 4px solid #b8860b; padding: 10px 14px; border-radius: 4px; }
+    dt { margin-top: 14px; font-style: italic; }
+    dd { margin: 4px 0 0 18px; }
+    @media (prefers-color-scheme: dark) {
+        body { color: #e8e8e8; background: #1b1c1e; }
+        h2 { border-top-color: #333333; }
+        code, pre { background: #26282b; }
+        .lead { color: #b6b6b6; }
+        .note { background: #332b13; }
+    }
+</style>
+</head>
+<body>
+
+<h1>Notes on extra fields</h1>
+<p class="lead">The <span class="ui">Extra Fields</span> tab is the one place in the module where
+markup is written by hand. Below: a ready-made example for every field type, a set for a typical
+form, and everything the module refuses, with the reasons.</p>
+
+<h2>How it works</h2>
+<ul>
+    <li>Fields are written into <span class="ui">Field Description</span> in the Joomla form format,
+    one <code>&lt;field&gt;</code> element per field. There is no need to wrap them in
+    <code>&lt;form&gt;</code> or <code>&lt;fieldset&gt;</code> — write the fields one after another.</li>
+    <li>On the page they follow the module's own fields, in front of the captcha, in the order they
+    are written. They reach the mail and Telegram in that same order.</li>
+    <li>Every field needs three things: a <code>name</code>, a <code>type</code> and a
+    <code>label</code>. The name is in Latin letters and the visitor never sees it; the label is in
+    the language of the site.</li>
+    <li><code>required="true"</code> makes a field mandatory.</li>
+    <li>After saving the module, open the page with the form while still logged in to the
+    administrator. If anything was refused, a notice with the reason appears above the form. Only
+    people who can manage modules see it; visitors get the form as usual. What each notice means is
+    in section 6.</li>
+</ul>
+<p class="note"><b>What the server checks and what only the browser does.</b> On their own,
+<code>pattern</code>, <code>maxlength</code>, <code>min</code> and <code>max</code> work in the
+browser only: a hint to the visitor, not a safeguard. The check on the server is switched on by
+<code>validate</code> — the examples below carry it where it is needed.</p>
+
+<h2>1. The eleven types</h2>
+<p>Each example can be pasted as it stands. Put your own label and options in; rename if you like.</p>
+
+<h3><code>text</code> — one line</h3>
+<pre><code>&lt;field name="company" type="text" label="Company" maxlength="100" /&gt;</code></pre>
+
+<h3><code>textarea</code> — several lines</h3>
+<pre><code>&lt;field name="address" type="textarea" label="Delivery address" rows="3" /&gt;</code></pre>
+
+<h3><code>email</code> — one more address</h3>
+<pre><code>&lt;field name="email_extra" type="email" label="Second email" validate="email" /&gt;</code></pre>
+<p>Without <code>validate="email"</code> only the browser checks the address. The main Email field
+is the module's own and does not have to be added here.</p>
+
+<h3><code>tel</code> — a phone number</h3>
+<pre><code>&lt;field name="phone" type="tel" label="Phone" inputmode="tel" validate="tel" /&gt;</code></pre>
+<p><code>validate="tel"</code> takes 7 to 15 digits; a plus, spaces, dots, hyphens and brackets
+between them are allowed. <code>inputmode="tel"</code> brings up the numeric keypad on a phone:
+Joomla prints the field itself as an ordinary text box.</p>
+
+<h3><code>url</code> — a web address</h3>
+<pre><code>&lt;field name="website" type="url" label="Your website" hint="https://" validate="url" /&gt;</code></pre>
+<p>An address is accepted only with <code>https://</code> or <code>http://</code> in front: a bare
+<code>example.com</code> is refused, which is why the hint in the box earns its place.</p>
+
+<h3><code>number</code> — a number</h3>
+<pre><code>&lt;field name="guests" type="number" label="Number of guests" min="1" max="20" step="1" validate="number" /&gt;</code></pre>
+<p>With <code>validate="number"</code> the server keeps to <code>min</code> and <code>max</code> as well.</p>
+
+<h3><code>list</code> — a drop-down</h3>
+<pre><code>&lt;field name="topic" type="list" label="Subject" validate="options"&gt;
+    &lt;option value=""&gt;— choose —&lt;/option&gt;
+    &lt;option value="question"&gt;A question&lt;/option&gt;
+    &lt;option value="order"&gt;An order&lt;/option&gt;
+    &lt;option value="other"&gt;Something else&lt;/option&gt;
+&lt;/field&gt;</code></pre>
+<p>The mail carries the wording of the option ("An order"), not its value (<code>order</code>). The
+first line with an empty value is what stops a mandatory list from being sent unchosen.</p>
+
+<h3><code>radio</code> — one of several</h3>
+<pre><code>&lt;field name="reply_by" type="radio" label="How should we reply" default="mail" validate="options"&gt;
+    &lt;option value="mail"&gt;By email&lt;/option&gt;
+    &lt;option value="call"&gt;By phone&lt;/option&gt;
+&lt;/field&gt;</code></pre>
+<p>The options are not optional: without them the page shows a label with no control under it.</p>
+
+<h3><code>checkbox</code> — a single tick box</h3>
+<pre><code>&lt;field name="callback" type="checkbox" label="Call me back" value="1" /&gt;</code></pre>
+<p>The mail says "Yes" or "No". A mandatory tick box is left out of the mail altogether: the form
+cannot be sent without it, so the answer is always the same.</p>
+
+<h3><code>checkboxes</code> — several tick boxes</h3>
+<pre><code>&lt;field name="interests" type="checkboxes" label="What are you interested in"&gt;
+    &lt;option value="price"&gt;Prices&lt;/option&gt;
+    &lt;option value="terms"&gt;Lead times&lt;/option&gt;
+    &lt;option value="demo"&gt;A demonstration&lt;/option&gt;
+&lt;/field&gt;</code></pre>
+<p>The mail lists the wordings of the ticked options, separated by commas.</p>
+
+<h3><code>calendar</code> — a date</h3>
+<pre><code>&lt;field name="visit_date" type="calendar" label="Preferred date" /&gt;</code></pre>
+<p>The date arrives as <code>2026-10-15</code>.</p>
+
+<h2>2. A ready-made set for a typical form</h2>
+<p>A phone number, a subject, a convenient time and a newsletter opt-in. Paste the whole thing and
+it works at once.</p>
+<pre><code>&lt;field name="phone" type="tel" label="Phone" hint="+44 20 7946 0958"
+    pattern="[0-9+\(\) \-]{7,20}" inputmode="tel" validate="tel" required="true" /&gt;
+
+&lt;field name="topic" type="list" label="Subject" required="true" validate="options"&gt;
+    &lt;option value=""&gt;— choose —&lt;/option&gt;
+    &lt;option value="question"&gt;A question&lt;/option&gt;
+    &lt;option value="order"&gt;An order&lt;/option&gt;
+    &lt;option value="other"&gt;Something else&lt;/option&gt;
+&lt;/field&gt;
+
+&lt;field name="call_time" type="radio" label="When is a good time to talk" default="any" validate="options"&gt;
+    &lt;option value="any"&gt;Any time&lt;/option&gt;
+    &lt;option value="morning"&gt;Before noon&lt;/option&gt;
+    &lt;option value="evening"&gt;After noon&lt;/option&gt;
+&lt;/field&gt;
+
+&lt;field name="newsletter" type="checkbox" label="Send me your news" value="1" /&gt;</code></pre>
+<ul>
+    <li><code>pattern</code> on the phone stops letters right in the browser, before the server is
+    asked. The brackets and the hyphen inside the square brackets carry a backslash on purpose:
+    without it the browser silently drops the whole pattern and lets anything through.</li>
+    <li>The newsletter opt-in is an <b>optional</b> tick box, separate from the consent to data
+    processing. The mail says "Yes" or "No", so you see who agreed. Make it mandatory and everybody
+    is forced to agree, and the answer no longer appears in the mail.</li>
+    <li>Do not add the consent to data processing here: the module has its own, the
+    <span class="ui">Consent Checkbox</span> setting on the Fields tab.</li>
+</ul>
+<p><b>How to check:</b> send the form with no phone and no subject — both fields should be marked,
+each with its own message. Then fill it in and send: the subject arrives in the mail as "An order",
+not as <code>order</code>.</p>
+
+<h2>3. Names that are taken</h2>
+<p>Eight names belong to the module itself, and a field carrying one of them is skipped:</p>
+<p><code>name</code>, <code>email</code>, <code>message</code>, <code>attachment</code>,
+<code>consent</code>, <code>captcha</code>, <code>mcx_hp</code>, <code>mcx_module_id</code>.</p>
+<p>Case makes no difference: <code>Email</code> and <code>CAPTCHA</code> are taken just the same.</p>
+<p>The reason: when Joomla meets a second field of the same name it does not add it, it <b>puts it in
+place of the first</b> — and says nothing. <code>captcha</code> is the worst case: an ordinary text
+box that is satisfied by any value would stand where the check was, and the form would go on
+believing itself protected. With <code>mcx_hp</code> the same happens to the trap for robots.</p>
+<p>For a second address or a second message, call the field something else: <code>email_extra</code>,
+<code>details</code>. For a file, switch on the <span class="ui">Attachment Field</span> on the Fields tab.</p>
+<p>Two extra fields of one name do not get along either: the first one stays.</p>
+
+<h2>4. Attributes the module takes off</h2>
+<p>The field itself stays and works; only the attribute goes, and a notice above the form says
+which one.</p>
+<ul>
+    <li><code>id</code> — Joomla builds the identifier from the name by itself. Set by hand, it gets
+    round the list of taken names: a field of any name with <code>id="mcx_hp"</code> pushes the trap
+    for robots off the page, and the protection is gone without a sign.</li>
+    <li><code>layout</code>, <code>layoutIncludePath</code> — swap the file that draws the field for a
+    file named in a setting.</li>
+    <li><code>fieldset</code>, <code>formsource</code> — move the field elsewhere on the page or pull
+    in a form description from outside.</li>
+    <li><code>addfieldprefix</code>, <code>addformprefix</code>, <code>addruleprefix</code>,
+    <code>addfilterprefix</code>, <code>addfieldpath</code>, <code>addformpath</code>,
+    <code>addrulepath</code>, <code>addfilterpath</code> — decide which code stands behind the word in
+    <code>type</code>. With them the list of accepted types means nothing at all: the description
+    still says <code>text</code> while somebody else's class does the work — and does it for every
+    form built on the page after this one.</li>
+</ul>
+<p>An ordinary form needs none of these attributes.</p>
+
+<h2>5. What a name may look like</h2>
+<p>A Latin letter first, then Latin letters, digits and the underscore:
+<code>^[a-zA-Z][a-zA-Z0-9_]*$</code>.</p>
+<p>Fine: <code>phone</code>, <code>call_time</code>, <code>phone2</code>. Not fine:
+<code>call-time</code>, <code>call.time</code>, <code>2phone</code>, <code>téléphone</code>.</p>
+<p>The hyphen and the dot are not banned out of strictness. Joomla makes the identifier of a field on
+the page out of its name, turning everything except letters, digits and the underscore into an
+underscore. <code>call-time</code>, <code>call.time</code> and <code>call_time</code> would all get
+the same identifier, and one of the three would be left on the page — silently.</p>
+
+<h2>6. Reading the notices</h2>
+<p>All of them appear above the form and begin with "Extra fields". None of them stops the form
+from being sent: a skipped field is simply not shown, and the rest work.</p>
+<dl>
+    <dt><span class="ui">Extra fields: the description could not be read, so no field was added.</span></dt>
+    <dd>A mistake in the writing itself: a tag left open, a lost quotation mark, the slash missing
+    from the closing <code>/&gt;</code>. The notice goes on to name the line and the reason — that
+    line is the one to mend. Until it is, <b>no</b> field is added, the correct ones included.</dd>
+
+    <dt><span class="ui">Extra fields: the description holds no field element, so nothing was added.</span></dt>
+    <dd>The text can be read, but there is no field in it. Usually a misspelt <code>field</code>, or
+    some text left where the description should be.</dd>
+
+    <dt><span class="ui">Extra fields: a field without a name was skipped.</span></dt>
+    <dd>Give the field a <code>name</code>.</dd>
+
+    <dt><span class="ui">Extra fields: the name … was refused and the field skipped.</span></dt>
+    <dd>The name holds something other than Latin letters, digits and underscores, or does not start
+    with a letter. See section 5.</dd>
+
+    <dt><span class="ui">Extra fields: the name … belongs to the module and the field was skipped.</span></dt>
+    <dd>A name from the list in section 3. Call the field something else.</dd>
+
+    <dt><span class="ui">Extra fields: the name … is used more than once, only the first field was kept.</span></dt>
+    <dd>Two fields of one name. Rename the second.</dd>
+
+    <dt><span class="ui">Extra fields: the field … has no type and was skipped.</span></dt>
+    <dd>Give the field a <code>type</code> — one of the eleven in section 1.</dd>
+
+    <dt><span class="ui">Extra fields: the field … was skipped, the type … is not accepted here.</span></dt>
+    <dd>The type is not one of the eleven. Check the spelling — <code>checkboxes</code>, not
+    <code>checkbox-list</code> — and look at section 7: the type may be refused on purpose.</dd>
+
+    <dt><span class="ui">Extra fields: the attribute … was removed from the field ….</span></dt>
+    <dd>The field works; only the attribute named was taken off. Remove it from the description and
+    the notice goes away. See section 4.</dd>
+</dl>
+<p>The same reasons, in one line each, are written to the log
+<code>administrator/logs/mod_mucronix_contact.php</code> — every time the form is sent, for as long
+as the description stays unmended.</p>
+
+<h2>7. What will never be accepted</h2>
+<p>Joomla has far more than eleven field types. These seven are refused on purpose:</p>
+<ul>
+    <li><code>sql</code> — runs the query written in its attribute and shows on the page what the
+    database answered. The right to edit a module would turn into the right to read tables.</li>
+    <li><code>user</code> — brings the administrator's user picker onto a public page.</li>
+    <li><code>file</code> — opens a second upload that goes round the checks on the first. For a file
+    there is the <span class="ui">Attachment Field</span>.</li>
+    <li><code>subform</code> — builds fields inside a field; the checks on names, types and
+    attributes do not reach them.</li>
+    <li><code>editor</code> — pulls the administrator's editor onto a public page, buttons and all.</li>
+    <li><code>accessiblemedia</code> — the same, with the image picker of the media manager.</li>
+    <li><code>hidden</code> — puts a value into the message that the visitor neither typed nor saw.</li>
+</ul>
+<p>A phone number, a list, a date, tick boxes — whatever a contact form needs, the eleven types
+cover. If a field from this list is the one thing missing, what is needed is a form builder, not
+this module.</p>
+
+</body>
+</html>
