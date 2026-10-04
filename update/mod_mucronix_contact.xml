@@ -46,7 +46,7 @@
 		<downloads>
 			<downloadurl type="full" format="zip">https://github.com/mucronix/mod_mucronix_contact/releases/download/v1.2.0/mod_mucronix_contact-1.2.0.zip</downloadurl>
 		</downloads>
-		<sha256>29a865c1756257bf339a9ebd41be51b1635016b91060910084609d8b777647a4</sha256>
+		<sha256>f2e144c9ed1b6134177555c229d62153a60c50f022d5ddb5da22995416a9b538</sha256>
 		<!--
 			No changelogurl on purpose. The address there is read by Changelog::loadFromXml(), which
 			expects an xml of its own - <changelogs> with <changelog> per version - and a page of release
