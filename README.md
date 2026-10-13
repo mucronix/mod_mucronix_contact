@@ -163,7 +163,7 @@ body .mcx {
 | `--mcx-field-border` | the border of the fields | `#dddddd` |
 | `--mcx-field-radius` | the corner radius of the fields | `4px` |
 | `--mcx-form-bg` | the background behind the form | transparent |
-| `--mcx-form-max` | the largest width of the form | none |
+| `--mcx-form-max` | the maximum width of the form | none |
 | `--mcx-ok`, `--mcx-ok-bg` | the block shown once a message has gone | `#27884a`, `#eaf6ee` |
 | `--mcx-error`, `--mcx-error-bg` | refusals, and the fields they belong to | `#c0392b`, `#fdecea` |
 | `--mcx-notice`, `--mcx-notice-bg` | the notice only site managers are shown | `#b8860b`, `#fff8e5` |
