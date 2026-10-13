@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mucronix Contact — styling notes</title>
+<style>
+    :root { color-scheme: light dark; }
+    body {
+        margin: 0 auto; padding: 24px 20px 64px; max-width: 860px;
+        font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        color: #1c1c1c; background: #ffffff;
+    }
+    h1 { font-size: 26px; margin: 0 0 8px; }
+    h2 { font-size: 20px; margin: 36px 0 8px; padding-top: 16px; border-top: 1px solid #e2e2e2; }
+    p, li { margin: 8px 0; }
+    code { font-family: ui-monospace, Consolas, monospace; font-size: 14px; background: #f2f4f7; padding: 1px 5px; border-radius: 3px; }
+    pre { background: #f2f4f7; border-left: 3px solid #2f6fbf; padding: 12px 14px; overflow-x: auto; border-radius: 4px; }
+    pre code { background: none; padding: 0; }
+    .lead { color: #444444; }
+    .note { background: #fff8e5; border-left: 4px solid #b8860b; padding: 10px 14px; border-radius: 4px; }
+    @media (prefers-color-scheme: dark) {
+        body { color: #e8e8e8; background: #1b1c1e; }
+        h2 { border-top-color: #333333; }
+        code, pre { background: #26282b; }
+        .lead { color: #b6b6b6; }
+        .note { background: #332b13; }
+    }
+</style>
+</head>
+<body>
+
+<h1>Styling notes</h1>
+<p class="lead">Two settings on the <b>Appearance</b> tab decide how much of the look the module
+draws. Everything else is done from your template, in two ways: a few CSS variables the form
+reads, and a layout you can override.</p>
+
+<h2>1. The two settings</h2>
+<ul>
+    <li><b>Field Markup</b> — <i>Joomla (Bootstrap 5)</i> for Cassiopeia and other Bootstrap
+    templates, <i>UIkit (YOOtheme)</i> for YOOtheme Pro, <i>No Added Classes</i> to leave the fields
+    exactly as the template draws them.</li>
+    <li><b>Own Styles</b> — <i>Full</i> draws a border round every field and spaces the fields out;
+    <i>Basic</i> only spaces them out and shows errors; <i>None</i> hands the whole form to the
+    template.</li>
+</ul>
+<p>After changing either, reload the page with <b>Ctrl+Shift+R</b>: the browser keeps the previous
+stylesheet otherwise.</p>
+
+<h2>2. Where the rules go, and your selector</h2>
+<p>The rules below go into the CSS of your template, not into the module.</p>
+<ul>
+    <li><b>Cassiopeia</b> — the file <code>user.css</code>. It does not exist until you create it:
+    <b>System → Site Templates → Cassiopeia Details and Files → New File</b>, choose the folder
+    <code>css</code>, give the name <code>user</code> and the file type <code>css</code>, then press
+    <b>Create</b>. Cassiopeia loads that file by itself.</li>
+    <li><b>YOOtheme Pro</b> — in the customizer, <b>Settings → CSS</b>.</li>
+</ul>
+<p>Every example begins with <code>YOUR-FORM</code>. Replace it with <code>#mcx-12</code>, where 12
+is the id of this module: the <b>ID</b> column in the list of site modules. To reach every contact
+form on the site at once, write <code>body .mcx</code> instead.</p>
+
+<h2>3. Variables that work with Full and Basic</h2>
+<pre><code>YOUR-FORM {
+    --mcx-gap: 16px;
+    --mcx-label-gap: 4px;
+}</code></pre>
+<ul>
+    <li><code>--mcx-gap</code> — the space between one field and the next, 12px by default.</li>
+    <li><code>--mcx-label-gap</code> — the space between a label and its field, 2px.</li>
+</ul>
+<p>The messages above the form and under the fields have colours of their own:</p>
+<pre><code>YOUR-FORM {
+    --mcx-error: #b00020;
+    --mcx-error-bg: #fdeaec;
+    --mcx-ok: #1f7a3d;
+    --mcx-ok-bg: #e9f6ed;
+    --mcx-radius: 6px;
+}</code></pre>
+<ul>
+    <li><code>--mcx-error</code>, <code>--mcx-error-bg</code> — an error: its text and the border
+    of the field it belongs to, and the background of the message block.</li>
+    <li><code>--mcx-ok</code>, <code>--mcx-ok-bg</code> — the message shown after sending.</li>
+    <li><code>--mcx-radius</code> — the corner radius of the message block, 4px.</li>
+</ul>
+
+<h2>4. Variables that work with Full only</h2>
+<pre><code>YOUR-FORM {
+    --mcx-field-border: #b8bec7;
+    --mcx-field-radius: 8px;
+    --mcx-form-max: 560px;
+    --mcx-accent: #0a7d55;
+}</code></pre>
+<ul>
+    <li><code>--mcx-field-border</code> — the colour of the field borders, #dddddd.</li>
+    <li><code>--mcx-field-radius</code> — the rounding of their corners, 4px.</li>
+    <li><code>--mcx-form-max</code> — the maximum width of the form. Without it the form takes the
+    whole width of its column.</li>
+    <li><code>--mcx-accent</code> — the colour of a field in focus and of a ticked checkbox,
+    #2f6fbf. Choose a dark one: a white tick does not show on a light colour. With <i>Basic</i> it
+    reaches the consent checkbox alone, and only on a template that leaves the drawing of
+    checkboxes to the browser.</li>
+</ul>
+<p>A background behind the form needs room inside it as well, so the two are written together:</p>
+<pre><code>YOUR-FORM {
+    --mcx-form-bg: #f6f7f9;
+    padding: 16px 20px;
+}</code></pre>
+<p class="note">With <i>Basic</i> and <i>None</i> the variables of this section do nothing, the one
+case named above aside: the stylesheet that reads them is loaded only with <i>Full</i>.</p>
+
+<h2>5. Overriding the layout</h2>
+<p>When a variable is not enough, the markup itself can be replaced, the way Joomla does it for any
+module: <b>System → Site Templates → your template → Create Overrides → Modules →
+mod_mucronix_contact</b>. Joomla copies two files into
+<code>templates/your-template/html/mod_mucronix_contact/</code>, and from then on the site uses the
+copies:</p>
+<ul>
+    <li><code>default.php</code> — the form on the page;</li>
+    <li><code>default_mail.php</code> — the body of the message you receive.</li>
+</ul>
+<p>To keep the original and add a second look beside it, save the copy under another name, for
+example <code>compact.php</code>, and choose it in the module, <b>Advanced → Layout</b>.</p>
+<p class="note">What an override of <code>default.php</code> has to keep, or the form stops sending:
+the wrapper with the class <code>mcx</code> and the id <code>mcx-…</code>, the form with the class
+<code>mcx-form</code>, the block <code>mcx-message</code>, the button <code>mcx-submit</code>, the
+block <code>mcx-hp</code> with its <code>hidden</code> attribute, the two hidden inputs
+<code>mcx_module_id</code> and <code>mcx_page</code>, and the form token. After an update of the
+module, compare your copy with the new original.</p>
+
+<h2>When a rule does nothing</h2>
+<ul>
+    <li>Check that <code>YOUR-FORM</code> was replaced — with the <code>#</code> and the right
+    id.</li>
+    <li>Reload with <b>Ctrl+Shift+R</b>, and clear the cache of the template if it has one.</li>
+    <li>Check <b>Own Styles</b>: with <i>None</i> no stylesheet of the module is loaded, and no
+    variable is read.</li>
+</ul>
+
+</body>
+</html>

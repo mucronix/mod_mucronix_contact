@@ -1,0 +1,33 @@
+{
+  "$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
+  "name": "mod_mucronix_contact",
+  "version": "2.0.0",
+  "description": "Mucronix Contact",
+  "license": "GPL-2.0-or-later",
+  "assets": [
+    {
+      "name": "mod_mucronix_contact.form",
+      "type": "script",
+      "uri": "mod_mucronix_contact/form.js",
+      "dependencies": [
+        "core"
+      ],
+      "attributes": {
+        "defer": true
+      }
+    },
+    {
+      "name": "mod_mucronix_contact.form",
+      "type": "style",
+      "uri": "mod_mucronix_contact/form-base.css"
+    },
+    {
+      "name": "mod_mucronix_contact.form-theme",
+      "type": "style",
+      "uri": "mod_mucronix_contact/form-theme.css",
+      "dependencies": [
+        "mod_mucronix_contact.form"
+      ]
+    }
+  ]
+}

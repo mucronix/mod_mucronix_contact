@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="uk-UA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mucronix Contact — пояснення щодо оформлення</title>
+<style>
+    :root { color-scheme: light dark; }
+    body {
+        margin: 0 auto; padding: 24px 20px 64px; max-width: 860px;
+        font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        color: #1c1c1c; background: #ffffff;
+    }
+    h1 { font-size: 26px; margin: 0 0 8px; }
+    h2 { font-size: 20px; margin: 36px 0 8px; padding-top: 16px; border-top: 1px solid #e2e2e2; }
+    p, li { margin: 8px 0; }
+    code { font-family: ui-monospace, Consolas, monospace; font-size: 14px; background: #f2f4f7; padding: 1px 5px; border-radius: 3px; }
+    pre { background: #f2f4f7; border-left: 3px solid #2f6fbf; padding: 12px 14px; overflow-x: auto; border-radius: 4px; }
+    pre code { background: none; padding: 0; }
+    .lead { color: #444444; }
+    .note { background: #fff8e5; border-left: 4px solid #b8860b; padding: 10px 14px; border-radius: 4px; }
+    @media (prefers-color-scheme: dark) {
+        body { color: #e8e8e8; background: #1b1c1e; }
+        h2 { border-top-color: #333333; }
+        code, pre { background: #26282b; }
+        .lead { color: #b6b6b6; }
+        .note { background: #332b13; }
+    }
+</style>
+</head>
+<body>
+
+<h1>Пояснення щодо оформлення</h1>
+<p class="lead">Два параметри на вкладці <b>Оформлення</b> вирішують, яку частину вигляду модуль
+малює сам. Усе інше робиться з шаблону, двома способами: кількома змінними CSS, які читає форма,
+і заміщенням її макета.</p>
+
+<h2>1. Два параметри</h2>
+<ul>
+    <li>«Розмітка полів» — <i>Joomla (Bootstrap 5)</i> для Cassiopeia та інших шаблонів
+    на Bootstrap, <i>UIkit (YOOtheme)</i> для YOOtheme Pro, <i>Без додаткових класів</i> лишає поля
+    точно такими, як їх малює шаблон.</li>
+    <li>«Власні стилі» — <i>Повний</i> малює рамку в кожного поля і розставляє поля;
+    <i>Базовий</i> лише розставляє їх і показує помилки; <i>Немає</i> віддає форму шаблону
+    цілком.</li>
+</ul>
+<p>Змінивши будь-який із них, оновіть сторінку через <b>Ctrl+Shift+R</b>: інакше в браузері
+лишається попередній файл стилів.</p>
+
+<h2>2. Куди писати правила і ваш селектор</h2>
+<p>Правила нижче пишуться в CSS вашого шаблону, а не в модуль.</p>
+<ul>
+    <li><b>Cassiopeia</b> — файл <code>user.css</code>. Поки ви його не створили, його немає:
+    <b>Система → Шаблони сайту → Деталі Cassiopeia → Новий файл</b>, оберіть теку
+    <code>css</code>, у полі «Нове ім'я файлу» впишіть <code>user</code>, у полі «Тип файлу»
+    оберіть <code>css</code> і натисніть <b>Створити</b>. Цей файл Cassiopeia підключає сама.</li>
+    <li><b>YOOtheme Pro</b> — у Customizer теми, <b>Налаштування → CSS</b>.</li>
+</ul>
+<p>Кожен приклад починається зі слова <code>ВАША-ФОРМА</code>. Замініть його на
+<code>#mcx-12</code>, де 12 — номер цього модуля: стовпець <b>ID</b> у списку модулів сайту. Щоб
+правило діяло на всі форми зворотного зв’язку одразу, напишіть натомість <code>body .mcx</code>.</p>
+
+<h2>3. Змінні, які працюють за «Повного» і «Базового»</h2>
+<pre><code>ВАША-ФОРМА {
+    --mcx-gap: 16px;
+    --mcx-label-gap: 4px;
+}</code></pre>
+<ul>
+    <li><code>--mcx-gap</code> — відстань між полями, типово 12px.</li>
+    <li><code>--mcx-label-gap</code> — відстань між підписом і його полем, 2px.</li>
+</ul>
+<p>Повідомлення над формою і під полями мають власні кольори:</p>
+<pre><code>ВАША-ФОРМА {
+    --mcx-error: #b00020;
+    --mcx-error-bg: #fdeaec;
+    --mcx-ok: #1f7a3d;
+    --mcx-ok-bg: #e9f6ed;
+    --mcx-radius: 6px;
+}</code></pre>
+<ul>
+    <li><code>--mcx-error</code>, <code>--mcx-error-bg</code> — помилка: її текст і рамка поля,
+    якого вона стосується, та тло блока повідомлення.</li>
+    <li><code>--mcx-ok</code>, <code>--mcx-ok-bg</code> — повідомлення після успішного
+    надсилання.</li>
+    <li><code>--mcx-radius</code> — заокруглення кутів блока повідомлення, 4px.</li>
+</ul>
+
+<h2>4. Змінні, які працюють лише за «Повного»</h2>
+<pre><code>ВАША-ФОРМА {
+    --mcx-field-border: #b8bec7;
+    --mcx-field-radius: 8px;
+    --mcx-form-max: 560px;
+    --mcx-accent: #0a7d55;
+}</code></pre>
+<ul>
+    <li><code>--mcx-field-border</code> — колір рамок полів, #dddddd.</li>
+    <li><code>--mcx-field-radius</code> — заокруглення їхніх кутів, 4px.</li>
+    <li><code>--mcx-form-max</code> — максимальна ширина форми. Без неї форма займає всю ширину
+    своєї колонки.</li>
+    <li><code>--mcx-accent</code> — колір поля у фокусі та позначеного чекбокса, #2f6fbf. Обирайте
+    темний: білої позначки на світлому кольорі не видно. За <i>Базового</i> змінна доходить лише
+    до чекбокса згоди, і тільки в шаблоні, який лишає малювання чекбоксів браузеру.</li>
+</ul>
+<p>Тлу під формою потрібен ще й відступ усередині, тому вони пишуться разом:</p>
+<pre><code>ВАША-ФОРМА {
+    --mcx-form-bg: #f6f7f9;
+    padding: 16px 20px;
+}</code></pre>
+<p class="note">За <i>Базового</i> і <i>Немає</i> змінні цього розділу нічого не роблять, окрім
+одного випадку, названого вище: файл стилів, який їх читає, підключає лише <i>Повний</i>.</p>
+
+<h2>5. Заміщення макета</h2>
+<p>Коли змінної замало, можна замінити саму розмітку — так, як Joomla дозволяє це для будь-якого
+модуля: <b>Система → Шаблони сайту → ваш шаблон → Створити заміщення → Модулі →
+mod_mucronix_contact</b>. Joomla скопіює два файли
+до <code>templates/ваш-шаблон/html/mod_mucronix_contact/</code>, і відтоді сайт бере копії:</p>
+<ul>
+    <li><code>default.php</code> — форма на сторінці;</li>
+    <li><code>default_mail.php</code> — тіло листа, який надходить вам.</li>
+</ul>
+<p>Щоб лишити початковий вигляд і додати поруч другий, збережіть копію під іншим іменем,
+наприклад <code>compact.php</code>, і оберіть її в модулі: <b>Додатково → Макет</b>.</p>
+<p class="note">Що заміщення <code>default.php</code> мусить зберегти, інакше форма
+перестане надсилатися: обгортку з класом <code>mcx</code> та ідентифікатором <code>mcx-…</code>,
+форму з класом <code>mcx-form</code>, блок <code>mcx-message</code>, кнопку
+<code>mcx-submit</code>, блок <code>mcx-hp</code> з атрибутом <code>hidden</code>, два приховані поля
+<code>mcx_module_id</code> і <code>mcx_page</code> та токен форми. Після оновлення модуля порівняйте
+свою копію з новим початковим файлом.</p>
+
+<h2>Якщо правило нічого не робить</h2>
+<ul>
+    <li>Перевірте, що <code>ВАША-ФОРМА</code> замінено — з решіткою <code>#</code> і правильним
+    номером.</li>
+    <li>Оновіть сторінку через <b>Ctrl+Shift+R</b> і очистіть кеш шаблону, якщо він у нього
+    власний.</li>
+    <li>Перевірте «Власні стилі»: за <i>Немає</i> жоден файл стилів модуля не підключається
+    і жодна змінна не читається.</li>
+</ul>
+
+</body>
+</html>

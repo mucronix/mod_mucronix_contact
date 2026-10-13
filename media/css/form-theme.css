@@ -1,0 +1,148 @@
+/**
+ * @package     mod_mucronix_contact
+ *
+ * @copyright   (C) 2026 Mucronix
+ * @license     GNU General Public License version 2 or later; see LICENSE
+ */
+
+/*
+ * The look of the form, loaded only with the Own Styles "Full" and always after form-base.css,
+ * on which the asset depends. Everything the Appearance tab draws lives here and nowhere else: the
+ * borders of the fields, the frame, background and width of the form, the button of the module and
+ * the field in focus. "Basic" and "None" leave this file out, and with it every border but the red
+ * one of a field in error.
+ *
+ * Nothing is drawn unless a modifier on the wrapper asks for it: mcx--fields-box, mcx--fields-line,
+ * mcx--form-framed, mcx--form-bg, mcx--button-own. mcx--fields-theme has no rules on purpose - it is
+ * the template's look, untouched.
+ *
+ * The values come as variables printed on the id of the instance, #mcx-<id>, and only when they
+ * differ from the defaults. Every var() below therefore carries the default as its fallback, the same
+ * one the Appearance tab starts with.
+ */
+
+/*
+ * The fields. Three classes of weight and no !important: a template gives its inputs one class,
+ * sometimes with :where() on top - .form-control:where(input) on YOOtheme DJ-Electronics - and its
+ * focus two, so three win both without a fight. A template that goes further is answered by a
+ * rule whose selector carries the id of the form.
+ *
+ * form-control and form-select are printed by the core layouts in every Field Markup, so they reach
+ * every input, textarea, select and file field alike, whatever put it into the form; the uk-* classes are
+ * listed for a UIkit template that styles only those. Checkboxes and radio buttons are not fields in
+ * this sense and keep the look of the template.
+ *
+ * The red border of a field in error still wins: form-base.css gives it one element more of weight.
+ */
+.mcx.mcx--fields-box .form-control,
+.mcx.mcx--fields-box .form-select,
+.mcx.mcx--fields-box .uk-input,
+.mcx.mcx--fields-box .uk-textarea,
+.mcx.mcx--fields-box .uk-select {
+    border: 1px solid var(--mcx-field-border, #dddddd);
+    border-radius: var(--mcx-field-radius, 4px);
+}
+
+/* A single line under the field. The other three sides are set to nothing rather than left alone,
+   or a template that draws a box would keep it. The corners are square and the Corner Radius
+   parameter is hidden with this look: rounding a single line bends it away from the text above it */
+.mcx.mcx--fields-line .form-control,
+.mcx.mcx--fields-line .form-select,
+.mcx.mcx--fields-line .uk-input,
+.mcx.mcx--fields-line .uk-textarea,
+.mcx.mcx--fields-line .uk-select {
+    border: 0 solid var(--mcx-field-border, #dddddd);
+    border-bottom-width: 1px;
+    border-radius: 0;
+}
+
+/*
+ * The field in focus takes the accent. The outline is made transparent rather than removed: in
+ * forced-colours mode the shadow disappears and a transparent outline is drawn in the system colour,
+ * so the focus never becomes invisible.
+ */
+.mcx.mcx--fields-box .form-control:focus,
+.mcx.mcx--fields-box .form-select:focus,
+.mcx.mcx--fields-box .uk-input:focus,
+.mcx.mcx--fields-box .uk-textarea:focus,
+.mcx.mcx--fields-box .uk-select:focus {
+    border-color: var(--mcx-accent, #2f6fbf);
+    box-shadow: 0 0 0 1px var(--mcx-accent, #2f6fbf);
+    outline: 2px solid transparent;
+}
+
+.mcx.mcx--fields-line .form-control:focus,
+.mcx.mcx--fields-line .form-select:focus,
+.mcx.mcx--fields-line .uk-input:focus,
+.mcx.mcx--fields-line .uk-textarea:focus,
+.mcx.mcx--fields-line .uk-select:focus {
+    border-color: var(--mcx-accent, #2f6fbf);
+    box-shadow: 0 1px 0 0 var(--mcx-accent, #2f6fbf);
+    outline: 2px solid transparent;
+}
+
+/*
+ * A ticked box in the accent colour, on templates that draw their checkboxes themselves - Bootstrap
+ * and Cassiopeia paint the box with a background, which accent-color in form-base.css cannot reach.
+ * Only the colour changes; the tick and the shape stay the template's.
+ *
+ * Not with the field look "As in Template": there the module draws no field of its own, and a
+ * checkbox in someone else's colour would be the one thing that gave it away.
+ */
+.mcx.mcx--fields-box .form-check-input:checked,
+.mcx.mcx--fields-box .uk-checkbox:checked,
+.mcx.mcx--fields-line .form-check-input:checked,
+.mcx.mcx--fields-line .uk-checkbox:checked {
+    background-color: var(--mcx-accent, #2f6fbf);
+    border-color: var(--mcx-accent, #2f6fbf);
+}
+
+/*
+ * The rest of the look sits in :where(), so it weighs nothing: a class of the template on the wrapper - a
+ * card, for one - and a rule of the site owner win over it without trying.
+ *
+ * The width belongs to the whole module - the title above the form is part of it - and the element
+ * holding both is the module container of the template, which this file cannot name. So the width
+ * arrives as a second inline rule beside the variables, :where(:has(> #mcx-<id>)), and the one here
+ * keeps the form itself in step wherever that container is shared with other modules.
+ */
+:where(.mcx) {
+    background-color: var(--mcx-form-bg, transparent);
+    max-width: var(--mcx-form-max, none);
+}
+
+/* Room inside, for a frame and for a background alike: fields flat against the edge of a colour
+   look like a mistake, and only the module knows there is a colour there at all */
+:where(.mcx.mcx--form-framed),
+:where(.mcx.mcx--form-bg) {
+    padding: 16px 20px;
+}
+
+:where(.mcx.mcx--form-framed) {
+    border: 1px solid var(--mcx-field-border, #dddddd);
+    border-radius: var(--mcx-field-radius, 4px);
+}
+
+/*
+ * The button of the module. The Field Markup gives it no framework class in this case, so the only
+ * rules left to beat are the element ones of a reset, button and [type=submit]: one class does that,
+ * and the :where() around the modifiers keeps it at exactly one.
+ */
+:where(.mcx.mcx--button-own) .mcx-submit {
+    background-color: var(--mcx-accent, #2f6fbf);
+    border: 1px solid var(--mcx-accent, #2f6fbf);
+    border-radius: var(--mcx-field-radius, 4px);
+    color: #ffffff;
+    cursor: pointer;
+    padding: 8px 20px;
+}
+
+/* Darker on hover without a second colour to set: the accent is darkened, whatever it is */
+:where(.mcx.mcx--button-own) .mcx-submit:hover {
+    filter: brightness(0.9);
+}
+
+:where(.mcx.mcx--button-own) .mcx-submit:focus-visible {
+    outline: 2px solid var(--mcx-accent, #2f6fbf);
+    outline-offset: 2px;
+}

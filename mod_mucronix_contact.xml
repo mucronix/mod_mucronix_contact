@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension type="module" client="site" method="upgrade">
+	<name>mod_mucronix_contact</name>
+	<author>Mucronix</author>
+	<creationDate>2026-09</creationDate>
+	<copyright>(C) 2026 Mucronix</copyright>
+	<license>GNU General Public License version 2 or later; see LICENSE</license>
+	<authorEmail>support@mucronix.com</authorEmail>
+	<authorUrl>https://mucronix.com</authorUrl>
+	<version>2.0.0</version>
+	<description>MOD_MUCRONIX_CONTACT_XML_DESCRIPTION</description>
+	<!-- Which edition this package is. script.php reads it from the manifest that is already installed,
+	     before the files are replaced, to know what is being installed over what. -->
+	<edition>lite</edition>
+	<scriptfile>script.php</scriptfile>
+	<namespace path="src">Mucronix\Module\MucronixContact</namespace>
+	<files>
+		<filename>LICENSE</filename>
+		<folder module="mod_mucronix_contact">services</folder>
+		<folder>forms</folder>
+		<folder>src</folder>
+		<folder>tmpl</folder>
+	</files>
+	<media destination="mod_mucronix_contact" folder="media">
+		<filename>joomla.asset.json</filename>
+		<folder>css</folder>
+		<!-- The notes, one page per language, each opened by a button on the tab it belongs to -->
+		<folder>docs</folder>
+		<folder>js</folder>
+	</media>
+	<languages>
+		<language tag="en-GB">language/en-GB/mod_mucronix_contact.ini</language>
+		<language tag="en-GB">language/en-GB/mod_mucronix_contact.sys.ini</language>
+		<language tag="ru-RU">language/ru-RU/mod_mucronix_contact.ini</language>
+		<language tag="ru-RU">language/ru-RU/mod_mucronix_contact.sys.ini</language>
+		<language tag="uk-UA">language/uk-UA/mod_mucronix_contact.ini</language>
+		<language tag="uk-UA">language/uk-UA/mod_mucronix_contact.sys.ini</language>
+	</languages>
+	<updateservers>
+		<server type="extension" priority="1" name="Mucronix Contact Lite">https://raw.githubusercontent.com/mucronix/mod_mucronix_contact/main/update/mod_mucronix_contact.xml</server>
+	</updateservers>
+	<config>
+		<fields name="params">
+			<!-- The prefix is how a field type of our own is found: FormHelper::loadClass() puts the
+			     type with its first letter raised and "Field" after it behind this namespace. -->
+			<fieldset name="basic" addfieldprefix="Mucronix\Module\MucronixContact\Site\Field">
+				<!-- First on the Module tab: the name and the installed version, read from the record
+				     of the extension in the database. Nothing is submitted and nothing is saved. -->
+				<field
+					name="module_version"
+					type="moduleversion"
+					label="MOD_MUCRONIX_CONTACT_FIELD_MODULE_VERSION_LABEL"
+				/>
+
+				<field
+					name="recipient"
+					type="text"
+					label="MOD_MUCRONIX_CONTACT_FIELD_RECIPIENT_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_RECIPIENT_DESC"
+					filter="string"
+				/>
+
+				<field
+					name="subject"
+					type="text"
+					label="MOD_MUCRONIX_CONTACT_FIELD_SUBJECT_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_SUBJECT_DESC"
+					filter="string"
+				/>
+
+				<field
+					name="form_intro"
+					type="editor"
+					label="MOD_MUCRONIX_CONTACT_FIELD_FORM_INTRO_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_FORM_INTRO_DESC"
+					filter="\Joomla\CMS\Component\ComponentHelper::filterText"
+					buttons="true"
+					hide="readmore,pagebreak,module,fields"
+				/>
+
+				<field
+					name="submit_text"
+					type="text"
+					label="MOD_MUCRONIX_CONTACT_FIELD_SUBMIT_TEXT_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_SUBMIT_TEXT_DESC"
+					filter="string"
+				/>
+
+				<field
+					name="captcha"
+					type="plugins"
+					folder="captcha"
+					label="MOD_MUCRONIX_CONTACT_FIELD_CAPTCHA_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_CAPTCHA_DESC"
+					filter="cmd"
+					useglobal="true"
+					>
+					<option value="0">JOPTION_DO_NOT_USE</option>
+				</field>
+
+				<field
+					name="success_text"
+					type="editor"
+					label="MOD_MUCRONIX_CONTACT_FIELD_SUCCESS_TEXT_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_SUCCESS_TEXT_DESC"
+					filter="\Joomla\CMS\Component\ComponentHelper::filterText"
+					buttons="true"
+					hide="readmore,pagebreak,module,fields"
+				/>
+			</fieldset>
+
+			<fieldset name="formfields" label="MOD_MUCRONIX_CONTACT_FIELDSET_FORMFIELDS_LABEL" addfieldprefix="Joomla\Component\Content\Administrator\Field">
+				<field
+					name="show_name"
+					type="radio"
+					layout="joomla.form.field.radio.switcher"
+					label="MOD_MUCRONIX_CONTACT_FIELD_SHOW_NAME_LABEL"
+					default="1"
+					filter="integer"
+					>
+					<option value="0">JHIDE</option>
+					<option value="1">JSHOW</option>
+				</field>
+
+				<field
+					name="require_name"
+					type="radio"
+					layout="joomla.form.field.radio.switcher"
+					label="MOD_MUCRONIX_CONTACT_FIELD_REQUIRE_NAME_LABEL"
+					default="1"
+					filter="integer"
+					showon="show_name:1"
+					>
+					<option value="0">JNO</option>
+					<option value="1">JYES</option>
+				</field>
+
+				<field
+					name="show_email"
+					type="radio"
+					layout="joomla.form.field.radio.switcher"
+					label="MOD_MUCRONIX_CONTACT_FIELD_SHOW_EMAIL_LABEL"
+					default="1"
+					filter="integer"
+					>
+					<option value="0">JHIDE</option>
+					<option value="1">JSHOW</option>
+				</field>
+
+				<field
+					name="require_email"
+					type="radio"
+					layout="joomla.form.field.radio.switcher"
+					label="MOD_MUCRONIX_CONTACT_FIELD_REQUIRE_EMAIL_LABEL"
+					default="1"
+					filter="integer"
+					showon="show_email:1"
+					>
+					<option value="0">JNO</option>
+					<option value="1">JYES</option>
+				</field>
+
+				<field
+					name="show_message"
+					type="radio"
+					layout="joomla.form.field.radio.switcher"
+					label="MOD_MUCRONIX_CONTACT_FIELD_SHOW_MESSAGE_LABEL"
+					default="1"
+					filter="integer"
+					>
+					<option value="0">JHIDE</option>
+					<option value="1">JSHOW</option>
+				</field>
+
+				<field
+					name="require_message"
+					type="radio"
+					layout="joomla.form.field.radio.switcher"
+					label="MOD_MUCRONIX_CONTACT_FIELD_REQUIRE_MESSAGE_LABEL"
+					default="1"
+					filter="integer"
+					showon="show_message:1"
+					>
+					<option value="0">JNO</option>
+					<option value="1">JYES</option>
+				</field>
+
+				<field
+					name="show_consent"
+					type="radio"
+					layout="joomla.form.field.radio.switcher"
+					label="MOD_MUCRONIX_CONTACT_FIELD_SHOW_CONSENT_LABEL"
+					default="1"
+					filter="integer"
+					>
+					<option value="0">JHIDE</option>
+					<option value="1">JSHOW</option>
+				</field>
+
+				<field
+					name="consent_article"
+					type="modal_article"
+					label="MOD_MUCRONIX_CONTACT_FIELD_CONSENT_ARTICLE_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_CONSENT_ARTICLE_DESC"
+					select="true"
+					new="true"
+					edit="true"
+					clear="true"
+					filter="integer"
+					showon="show_consent:1"
+				/>
+
+				<field
+					name="consent_text"
+					type="text"
+					label="MOD_MUCRONIX_CONTACT_FIELD_CONSENT_TEXT_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_CONSENT_TEXT_DESC"
+					filter="string"
+					showon="show_consent:1"
+				/>
+			</fieldset>
+
+			<fieldset name="appearance" label="MOD_MUCRONIX_CONTACT_FIELDSET_APPEARANCE_LABEL" addfieldprefix="Mucronix\Module\MucronixContact\Site\Field">
+				<!-- Classes are added to what the core layouts print, never taken away. The table
+				     of classes lives in the helper, MARKUP_CLASSES. -->
+				<field
+					name="markup"
+					type="list"
+					label="MOD_MUCRONIX_CONTACT_FIELD_MARKUP_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_MARKUP_DESC"
+					default="joomla"
+					validate="options"
+					>
+					<option value="joomla">MOD_MUCRONIX_CONTACT_FIELD_MARKUP_JOOMLA</option>
+					<option value="uikit">MOD_MUCRONIX_CONTACT_FIELD_MARKUP_UIKIT</option>
+					<option value="none">MOD_MUCRONIX_CONTACT_FIELD_MARKUP_NONE</option>
+				</field>
+
+				<!-- How much of the look the module draws: "Full" loads form-base.css and form-theme.css,
+				     "Basic" the first alone, "None" neither. -->
+				<field
+					name="style_mode"
+					type="list"
+					label="MOD_MUCRONIX_CONTACT_FIELD_STYLE_MODE_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_STYLE_MODE_DESC"
+					default="full"
+					validate="options"
+					>
+					<option value="full">MOD_MUCRONIX_CONTACT_FIELD_STYLE_MODE_FULL</option>
+					<option value="base">MOD_MUCRONIX_CONTACT_FIELD_STYLE_MODE_BASE</option>
+					<option value="none">MOD_MUCRONIX_CONTACT_FIELD_STYLE_MODE_NONE</option>
+				</field>
+
+				<field
+					name="styling_docs"
+					type="stylingdocs"
+					label="MOD_MUCRONIX_CONTACT_FIELD_STYLING_DOCS_LABEL"
+					description="MOD_MUCRONIX_CONTACT_FIELD_STYLING_DOCS_DESC"
+				/>
+			</fieldset>
+
+			<fieldset name="advanced">
+				<field
+					name="layout"
+					type="modulelayout"
+					label="JFIELD_ALT_LAYOUT_LABEL"
+					class="form-select"
+					validate="moduleLayout"
+				/>
+
+				<field
+					name="moduleclass_sfx"
+					type="textarea"
+					label="COM_MODULES_FIELD_MODULECLASS_SFX_LABEL"
+					rows="3"
+					validate="CssIdentifier"
+				/>
+			</fieldset>
+		</fields>
+	</config>
+</extension>

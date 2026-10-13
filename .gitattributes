@@ -1,0 +1,6 @@
+# Line endings are fixed to LF in the working tree, not only in the index.
+#
+# Without this, core.autocrlf on a Windows clone hands out CRLF files, and the release ZIP built
+# from that clone differs from one built anywhere else. The package has to come out the same from
+# any clone, on any machine.
+* text=auto eol=lf
