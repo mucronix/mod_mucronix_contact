@@ -2,18 +2,18 @@
 
 [🇷🇺 Русская версия](README.ru.md)
 
-A contact form that sits in the page. The visitor fills it in, presses Send, and the message goes
+A contact form embedded in your page. The visitor fills it in, presses Send, and the message goes
 to the site owner by email. The page does not reload.
 
-Built for **Joomla 6 with the Behaviour Backward Compatibility plugin switched off**. That is the
-point of it: no `JFactory`, no `JText`, nothing from the old namespaceless world.
+Built for **Joomla 6 with the Behaviour Backward Compatibility plugin switched off**. It uses no
+`JFactory`, no `JText` and no other legacy non-namespaced classes.
 
 - **Requirements:** Joomla 6.0 or later, PHP 8.3 or later.
 - **Licence:** GNU GPL version 2 or later, see `LICENSE`.
 - **Support:** support@mucronix.com
 
-This repository holds **Lite**, the free edition. **Pro** adds Telegram, extra fields, attachments
-and the full set of appearance settings:
+This repository contains **Lite**, the free edition. **Pro** adds Telegram, extra fields,
+attachments and the full set of appearance settings:
 <https://mucronix.com/products/joomla/mucronix-contact>
 
 ---
@@ -47,8 +47,8 @@ and the full set of appearance settings:
 | The version and the edition in the first line of the Module tab | ✓ | ✓ |
 | Languages en-GB, ru-RU, uk-UA | ✓ | ✓ |
 
-Both editions are one module under one name, `mod_mucronix_contact`. Pro is installed over Lite the
-ordinary way, and the settings of every form stay where they are.
+Both editions use the same Joomla module, `mod_mucronix_contact`. Pro can be installed over Lite
+through the standard Joomla installer, and all form settings are preserved.
 
 ---
 
@@ -56,18 +56,18 @@ ordinary way, and the settings of every form stay where they are.
 
 Download `mod_mucronix_contact-lite-<version>.zip` from
 [Releases](https://github.com/mucronix/mod_mucronix_contact/releases), install it through
-**System → Install → Extensions**, then publish the module in **Content → Site Modules** and give it
-a position and a menu assignment like any other module.
+**System → Install → Extensions**, then publish the module in **Content → Site Modules** and assign
+it a position and menu items as for any other module.
 
-The install refuses to run on Joomla below 6.0 or PHP below 8.3 and says why. Joomla does not read
-minimum versions out of an extension manifest on a first install, only out of an update server, so
-the module checks for itself.
+Installation stops on Joomla below 6.0 or PHP below 8.3 and reports the reason. On a first install
+Joomla does not read minimum versions from an extension manifest, only from an update server, so
+the module performs the check itself.
 
 ---
 
 ## Settings
 
-**Module** — who the message goes to and what the visitor reads.
+**Module** — who receives the message and what the visitor sees.
 
 | | |
 |---|---|
@@ -75,15 +75,15 @@ the module checks for itself.
 | Subject | Empty uses "Message from *site name*" |
 | Intro Text | Shown above the form, HTML allowed |
 | Button Text | Empty uses the standard wording |
-| Captcha | Which captcha guards this form. Use Global follows the site setting |
-| Success Message | Shown in place of the form once the message has gone |
+| Captcha | Which CAPTCHA protects this form. Use Global follows the site setting |
+| Success Message | Shown in place of the form once the message has been sent |
 
 There is deliberately no "form heading" setting. Joomla already gives every module a title with a
-tag and a class of its own; a second heading would print two in a row. If you hide the module title
-and still want a heading, put it in Intro Text, which takes HTML.
+tag and a class of its own; a second heading would produce two headings in a row. If you hide the
+module title and still want a heading, put it in Intro Text, which accepts HTML.
 
 **Fields** — which of Name, Email and Message are shown and which are required, the consent checkbox,
-the article holding your privacy policy and the wording beside the checkbox.
+the article containing your privacy policy and the text next to the checkbox.
 
 **Appearance** — Field Markup, Own Styles and a button that opens the styling notes. See
 [Styling](#styling).
@@ -95,25 +95,25 @@ the article holding your privacy policy and the wording beside the checkbox.
 
 ## The Page Cache plugin
 
-If **System — Page Cache** is switched on, exclude the page carrying this form. The plugin hands
-whole stored pages to visitors who are not logged in, and two separate things then go wrong, neither
-of which shows up anywhere.
+If **System — Page Cache** is switched on, exclude the page that contains this form. The plugin
+serves whole cached pages to visitors who are not logged in, which causes two separate problems,
+and neither produces a visible error.
 
-**The form token is stored with the page.** Every guest after the first is handed somebody else's
-token, and the form refuses to send. Reloading does not help: it brings back the same stored page
+**The form token is cached with the page.** Every guest after the first receives another visitor's
+token, and the form refuses to send. Reloading does not help: it returns the same cached page
 with the same token.
 
-**The answer replaces the form.** This one is worse and much less obvious. After a submission
-without JavaScript the module redirects back to the same address, the browser asks for it with a
-GET, and that page — the one saying the message has been sent — is what goes into the store. From
-then on guests are shown a confirmation of somebody else's message instead of the form.
+**The response replaces the form.** This problem is more serious and harder to notice. After a
+submission without JavaScript the module redirects back to the same address, the browser requests
+it with a GET, and that page — the one saying the message has been sent — is what gets cached. From
+then on guests see a confirmation of another visitor's message instead of the form.
 
 Use **Exclude Menu Items** or **Exclude URLs** in the plugin's settings.
 
-The module cannot do anything about this on its own: caching is called off through an event raised
-long before any module is drawn, and only a plugin may answer it. It warns the site owner instead.
-If no visitor can reach the form without logging in, none of this applies — the plugin leaves pages
-for logged-in users alone.
+The module cannot prevent this on its own: caching is disabled through an event raised long before
+any module is rendered, and only a plugin can handle it. The module warns the site owner instead.
+If no visitor can reach the form without logging in, none of this applies — the plugin does not
+cache pages for logged-in users.
 
 ---
 
@@ -121,8 +121,8 @@ for logged-in users alone.
 
 ### 1. The two settings
 
-**Field Markup** adds the form classes of your template's framework. The module never takes a class
-away, so whatever the core prints stays.
+**Field Markup** adds the form classes of your template's framework. The module never removes a
+class, so everything the core outputs is kept.
 
 | Template | Choose |
 |---|---|
@@ -130,17 +130,17 @@ away, so whatever the core prints stays.
 | YOOtheme Pro | UIkit (YOOtheme) |
 | Anything else | try both, keep the better one, or No Added Classes |
 
-**Own Styles** says how much the module draws: *Full* — spacing and a border round every field;
-*Basic* — spacing, the consent line and error highlighting, nothing more; *None* — not one stylesheet
-of the module, the template dresses the form.
+**Own Styles** sets how much the module styles: *Full* — spacing and a border around every field;
+*Basic* — spacing, the consent line and error highlighting, nothing more; *None* — no module
+stylesheet is loaded, and the template styles the form.
 
 ### 2. Variables in your template's CSS
 
-Everything the module draws is held in variables. Set them in the CSS of your template:
+Everything the module styles is controlled by CSS variables. Set them in the CSS of your template:
 
 - **Cassiopeia** — the file `user.css`. It does not exist until you create it: **System → Site
-  Templates → Cassiopeia Details and Files → New File**, choose the folder `css`, give the name
-  `user` and the file type `css`, then press **Create**. Cassiopeia loads that file by itself.
+  Templates → Cassiopeia Details and Files → New File**, choose the folder `css`, enter the name
+  `user` and the file type `css`, then press **Create**. Cassiopeia loads that file automatically.
 - **YOOtheme Pro** — in the customizer, **Settings → CSS**.
 
 Write them on `#mcx-12`, where 12 is the id of the module, or on `body .mcx` for every contact
@@ -156,50 +156,50 @@ body .mcx {
 
 | Variable | Sets | Default |
 |---|---|---|
-| `--mcx-gap` | the air between one field and the next | `12px` |
-| `--mcx-label-gap` | the air between a label and its own field | `2px` |
+| `--mcx-gap` | the space between one field and the next | `12px` |
+| `--mcx-label-gap` | the space between a label and its own field | `2px` |
 | `--mcx-accent` | a field in focus, the ticked checkbox | `#2f6fbf` |
 | `--mcx-radius` | the corner radius of the message and notice blocks | `4px` |
 | `--mcx-field-border` | the border of the fields | `#dddddd` |
 | `--mcx-field-radius` | the corner radius of the fields | `4px` |
 | `--mcx-form-bg` | the background behind the form | transparent |
 | `--mcx-form-max` | the maximum width of the form | none |
-| `--mcx-ok`, `--mcx-ok-bg` | the block shown once a message has gone | `#27884a`, `#eaf6ee` |
-| `--mcx-error`, `--mcx-error-bg` | refusals, and the fields they belong to | `#c0392b`, `#fdecea` |
-| `--mcx-notice`, `--mcx-notice-bg` | the notice only site managers are shown | `#b8860b`, `#fff8e5` |
+| `--mcx-ok`, `--mcx-ok-bg` | the block shown once a message has been sent | `#27884a`, `#eaf6ee` |
+| `--mcx-error`, `--mcx-error-bg` | error messages and the fields they relate to | `#c0392b`, `#fdecea` |
+| `--mcx-notice`, `--mcx-notice-bg` | the notice shown only to site managers | `#b8860b`, `#fff8e5` |
 
-`--mcx-field-border`, `--mcx-field-radius`, `--mcx-form-bg` and `--mcx-form-max` only ever do
-anything with Own Styles on *Full*: they are read by the stylesheet that *Basic* and *None* leave
-out.
+`--mcx-field-border`, `--mcx-field-radius`, `--mcx-form-bg` and `--mcx-form-max` take effect only
+when Own Styles is set to *Full*: they are read by the stylesheet that *Basic* and *None* do not
+load.
 
 > ⚠️ **Give `--mcx-accent` a dark colour.** It tints the consent checkbox, and the browser draws the
-> tick on top of it in white. A pale accent gives you white on white: a ticked checkbox that looks
+> tick on top of it in white. A pale accent results in white on white: a ticked checkbox that looks
 > empty.
 
-The same is told, with examples, on the page the **Open the styling notes** button opens. It ships
-with the module, one per language, at `media/mod_mucronix_contact/docs/styling.<language>.html`.
+The same information, with examples, is on the page opened by the **Open the styling notes**
+button. The page ships with the module, one per language, at
+`media/mod_mucronix_contact/docs/styling.<language>.html`.
 
 ### 3. Overriding the layout
 
 Copy `tmpl/default.php` to `templates/<your template>/html/mod_mucronix_contact/default.php` and
 edit the copy — or let Joomla do it: **System → Site Templates → your template → Create Overrides →
-Modules → mod_mucronix_contact**. Joomla finds the copy by itself, and updates leave it alone.
-`default_mail.php` beside it is the body of the message you receive.
+Modules → mod_mucronix_contact**. Joomla picks up the copy automatically, and updates do not
+overwrite it. `default_mail.php` next to it is the body of the message you receive.
 
-> ⚠️ **This layout is more than markup.** It carries the wiring the sending runs on, and most of
-> what can break here breaks quietly: the form still looks right, and only the messages stop
-> arriving.
+> ⚠️ **This layout is more than markup.** It contains the elements that sending depends on, and most
+> failures here are silent: the form still looks right, but the messages stop arriving.
 
-Drop any of these and **the form stops sending**:
+Remove any of these and **the form stops sending**:
 
 - the hidden `mcx_module_id`, which tells the module which of its instances was used;
 - the hidden `mcx_page`, the address a message is reported as coming from;
 - the token printed by `HTMLHelper::_('form.token')`;
-- the loop that renders the fields: their names are built from the module id, and inputs written
-  out by hand will not answer to them.
+- the loop that renders the fields: their names are built from the module id, and hand-written
+  inputs will not match them.
 
-Drop any of these and **the AJAX layer dies without a sound** — the form falls back to a plain post,
-goes on working, and nobody notices:
+Remove any of these and **AJAX sending stops silently** — the form falls back to a regular POST,
+keeps working, and nothing indicates the change:
 
 - the class `mcx` on the outer element;
 - the class `mcx-form` on the `<form>`;
@@ -207,35 +207,36 @@ goes on working, and nobody notices:
 - the two lines that register and load the script;
 - the `Text::script(...)` lines, without which the button and the error fall back to English.
 
-Drop any of these and **messages land in the wrong place, or nowhere**:
+Remove any of these and **messages appear in the wrong place or not at all**:
 
 - the `mcx-message` block, where everything after a submission is written;
-- `mcx-submit` on the button, which is how it says it is sending;
-- `mcx-field--<name>` on each field, which is how an error finds the field it belongs to;
-- `mcx-field-wrap` around a field, which is where that error is put;
+- `mcx-submit` on the button, which is used to show that the form is sending;
+- `mcx-field--<name>` on each field, which links an error to its field;
+- `mcx-field-wrap` around a field, where that error is placed;
 - `id="mcx-<module id>"` on the outer element, the anchor a submission without JavaScript returns to;
-- the hidden trap field, whose loss shows nowhere and costs the protection.
+- the hidden honeypot field; removing it produces no visible change but disables that protection.
 
 ---
 
 ## Things worth knowing
 
-- **The form works without JavaScript.** It posts normally, the server draws the errors in the same
-  places the script would, and the answer arrives through a redirect so that refreshing the page
-  never asks whether to send the form again.
-- **One message per thirty seconds per session.** A second form on the same site shares that wait.
+- **The form works without JavaScript.** It posts normally, the server renders the errors in the
+  same places the script would, and the response arrives through a redirect so that refreshing the
+  page never asks whether to send the form again.
+- **One message per thirty seconds per session.** A second form on the same site shares that limit.
 - **Nothing is stored in the database.** No message history, no admin inbox.
 
 ---
 
 ## Updates
 
-The module carries an update server, so Joomla offers new versions of Lite in the usual place.
-Releases and their notes are at <https://github.com/mucronix/mod_mucronix_contact/releases>, and
-what changed in each version is in [CHANGELOG.md](CHANGELOG.md).
+The module includes an update server, so Joomla offers new versions of Lite through its standard
+updater. Releases and their notes are at <https://github.com/mucronix/mod_mucronix_contact/releases>,
+and what changed in each version is in [CHANGELOG.md](CHANGELOG.md).
 
 Lite is never offered an update to Pro: the two editions are updated from different addresses.
 
-> ⚠️ **Installing Lite over Pro costs you the settings only Pro has.** The installer says so and goes
-> ahead. The forms keep working, with what Lite has; the settings of Pro stay stored until a module
-> is next saved, and are dropped at that moment. To go back, install Pro again before saving.
+> ⚠️ **Installing Lite over Pro means losing the settings that only Pro has.** The installer warns
+> about this and continues. The forms keep working with the Lite features; the Pro settings remain
+> stored until the module is next saved and are discarded at that moment. To restore them, install
+> Pro again before saving.
