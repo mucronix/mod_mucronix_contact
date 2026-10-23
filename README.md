@@ -5,6 +5,8 @@
 A contact form embedded in your page. The visitor fills it in, presses Send, and the message goes
 to the site owner by email. The page does not reload.
 
+Available in the Joomla! Extensions Directory: [Mucronix Contact Lite on JED](https://extensions.joomla.org/extension/contacts-and-feedback/contact-forms/mucronix-contact-lite/)
+
 Built for **Joomla 6 with the Behaviour Backward Compatibility plugin switched off**. It uses no
 `JFactory`, no `JText` and no other legacy non-namespaced classes.
 
@@ -224,7 +226,7 @@ Remove any of these and **messages appear in the wrong place or not at all**:
   same places the script would, and the response arrives through a redirect so that refreshing the
   page never asks whether to send the form again.
 - **One message per thirty seconds per session.** A second form on the same site shares that limit.
-- **Nothing is stored in the database.** No message history, no admin inbox.
+- **Messages are not stored:** no tables of its own, no message history, no admin inbox.
 
 ---
 
