@@ -1,5 +1,16 @@
 # Changelog
 
+## Pro 2.0.1
+
+Pro only. Lite stays at 2.0.0: from now on the two editions have version numbers of their own.
+
+- Pro is updated through mucronix.com, and the download key entered for its update source is
+  checked there.
+- After installing 2.0.1 over 2.0.0, enter the download key again. The installer replaces the
+  update source of 2.0.0 with the new one, and the new one starts with an empty key: System →
+  Update → Update Sites → Mucronix Contact Pro → Download Key. Later updates keep the key.
+- The settings of every form stay as they are.
+
 ## 2.0.0
 
 The first public version, in two editions built from one source: **Mucronix Contact Lite**, free,

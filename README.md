@@ -16,7 +16,7 @@ Built for **Joomla 6 with the Behaviour Backward Compatibility plugin switched o
 
 This repository contains **Lite**, the free edition. **Pro** adds Telegram, extra fields,
 attachments and the full set of appearance settings:
-<https://mucronix.com/products/joomla/mucronix-contact>
+<https://mucronix.com/products/joomla/mucronix-contact-pro>
 
 ---
 

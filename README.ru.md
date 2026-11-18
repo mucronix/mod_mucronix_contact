@@ -16,7 +16,7 @@
 
 В этом репозитории — **Lite**, бесплатная редакция. В **Pro** есть ещё Telegram, дополнительные
 поля, вложения и полный набор параметров оформления:
-<https://mucronix.com/products/joomla/mucronix-contact>
+<https://mucronix.com/products/joomla/mucronix-contact-pro>
 
 ---
 
