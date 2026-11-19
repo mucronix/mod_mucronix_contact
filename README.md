@@ -26,28 +26,28 @@ attachments and the full set of appearance settings:
 |---|:-:|:-:|
 | The message by email | ✓ | ✓ |
 | Recipient, Subject, Intro Text, Button Text, Success Message | ✓ | ✓ |
-| Additional Recipients | — | ✓ |
-| Thank You Page | — | ✓ |
 | Captcha (Use Global or a chosen one) + honeypot | ✓ | ✓ |
 | Limit: one message in 30 seconds per session | ✓ | ✓ |
 | Name / Email / Message fields: shown and required | ✓ | ✓ |
 | Consent Checkbox + Policy Article + Consent Text | ✓ | ✓ |
-| Attachment Field and everything that belongs to it (types, limit, the copy of the core layout file.php) | — | ✓ |
-| Extra Fields + the page "Notes on extra fields" | — | ✓ |
-| Telegram (the whole tab) | — | ✓ |
 | Appearance: Field Markup (Bootstrap 5 / UIkit / No Added Classes) | ✓ | ✓ |
 | Appearance: Own Styles (Full / Basic / None) | ✓ | ✓ |
-| Appearance: Field Look, Border Colour, Corner Radius, Space Between Fields, Frame, Form Background, Form Width, Button Look, Accent Colour | — | ✓ |
-| Appearance: Wrapper / Form / Field / Button Class, Custom CSS | — | ✓ |
-| The page "Styling notes" | short: the CSS variables `--mcx-*` and overriding the layout only | full |
 | The CSS variables `--mcx-*` in the site template | ✓ | ✓ |
 | Working without JavaScript, sending by AJAX | ✓ | ✓ |
 | Log of errors | ✓ | ✓ |
-| Log Sent Messages | — | ✓ |
 | The notice above the form for site managers (only about what the edition has) | ✓ | ✓ |
 | The check for Joomla 6.0+ / PHP 8.3+ on installation | ✓ | ✓ |
 | The version and the edition in the first line of the Module tab | ✓ | ✓ |
 | Languages en-GB, ru-RU, uk-UA | ✓ | ✓ |
+| The page "Styling notes" | short: the CSS variables `--mcx-*` and overriding the layout only | full |
+| Additional Recipients | — | ✓ |
+| Thank You Page | — | ✓ |
+| Attachment Field and everything that belongs to it (types, limit, the copy of the core layout file.php) | — | ✓ |
+| Extra Fields + the page "Notes on extra fields" | — | ✓ |
+| Telegram (the whole tab) | — | ✓ |
+| Appearance: Field Look, Border Colour, Corner Radius, Space Between Fields, Frame, Form Background, Form Width, Button Look, Accent Colour | — | ✓ |
+| Appearance: Wrapper / Form / Field / Button Class, Custom CSS | — | ✓ |
+| Log Sent Messages | — | ✓ |
 
 Both editions use the same Joomla module, `mod_mucronix_contact`. Pro can be installed over Lite
 through the standard Joomla installer, and all form settings are preserved.
