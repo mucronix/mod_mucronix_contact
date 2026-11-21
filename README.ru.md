@@ -1,4 +1,4 @@
-# Mucronix Contact Lite
+# Mucronix Contact
 
 [🇬🇧 English version](README.md)
 
