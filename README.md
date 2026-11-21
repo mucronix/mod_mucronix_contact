@@ -24,7 +24,7 @@ attachments and the full set of appearance settings:
 
 | Feature | Lite | Pro |
 |---|:-:|:-:|
-| The message by email | ✓ | ✓ |
+| Email notification | ✓ | ✓ |
 | Recipient, Subject, Intro Text, Button Text, Success Message | ✓ | ✓ |
 | Captcha (Use Global or a chosen one) + honeypot | ✓ | ✓ |
 | Limit: one message in 30 seconds per session | ✓ | ✓ |
@@ -32,14 +32,14 @@ attachments and the full set of appearance settings:
 | Consent Checkbox + Policy Article + Consent Text | ✓ | ✓ |
 | Appearance: Field Markup (Bootstrap 5 / UIkit / No Added Classes) | ✓ | ✓ |
 | Appearance: Own Styles (Full / Basic / None) | ✓ | ✓ |
-| The CSS variables `--mcx-*` in the site template | ✓ | ✓ |
+| CSS variables `--mcx-*` in the site template | ✓ | ✓ |
 | Working without JavaScript, sending by AJAX | ✓ | ✓ |
-| Log of errors | ✓ | ✓ |
-| The notice above the form for site managers (only about what the edition has) | ✓ | ✓ |
-| The check for Joomla 6.0+ / PHP 8.3+ on installation | ✓ | ✓ |
-| The version and the edition in the first line of the Module tab | ✓ | ✓ |
+| Error log | ✓ | ✓ |
+| Notice above the form for site managers (only about what the edition has) | ✓ | ✓ |
+| Joomla 6.0+ / PHP 8.3+ check on install | ✓ | ✓ |
+| Version and edition in the first line of the Module tab | ✓ | ✓ |
 | Languages en-GB, ru-RU, uk-UA | ✓ | ✓ |
-| The page "Styling notes" | short: the CSS variables `--mcx-*` and overriding the layout only | full |
+| "Styling notes" page | short: the CSS variables `--mcx-*` and overriding the layout only | full |
 | Additional Recipients | — | ✓ |
 | Thank You Page | — | ✓ |
 | Attachment Field and everything that belongs to it (types, limit, the copy of the core layout file.php) | — | ✓ |
