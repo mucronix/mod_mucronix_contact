@@ -5,7 +5,7 @@
 A contact form embedded in your page. The visitor fills it in, presses Send, and the message goes
 to the site owner by email. The page does not reload.
 
-Available in the Joomla! Extensions Directory: [Mucronix Contact Lite on JED](https://extensions.joomla.org/extension/contacts-and-feedback/contact-forms/mucronix-contact-lite/)
+Available in the Joomla! Extensions Directory: [Mucronix Contact Lite](https://extensions.joomla.org/extension/contacts-and-feedback/contact-forms/mucronix-contact-lite/) · [Mucronix Contact Pro](https://extensions.joomla.org/extension/contacts-and-feedback/contact-forms/mucronix-contact-pro/)
 
 Built for **Joomla 6 with the Behaviour Backward Compatibility plugin switched off**. It uses no
 `JFactory`, no `JText` and no other legacy non-namespaced classes.

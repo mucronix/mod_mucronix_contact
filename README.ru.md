@@ -5,7 +5,7 @@
 Модуль выводит на странице форму обратной связи. Посетитель заполняет её и нажимает «Отправить» —
 сообщение приходит владельцу сайта на почту. Страница при этом не перезагружается.
 
-Модуль есть в Joomla! Extensions Directory: [Mucronix Contact Lite в JED](https://extensions.joomla.org/extension/contacts-and-feedback/contact-forms/mucronix-contact-lite/)
+Модуль есть в Joomla! Extensions Directory: [Mucronix Contact Lite](https://extensions.joomla.org/extension/contacts-and-feedback/contact-forms/mucronix-contact-lite/) · [Mucronix Contact Pro](https://extensions.joomla.org/extension/contacts-and-feedback/contact-forms/mucronix-contact-pro/)
 
 Модуль рассчитан на **Joomla 6 с выключенным плагином «Поведение - Обратная совместимость 6»**. Ради
 этого он и написан: в коде нет ни `JFactory`, ни `JText`, ни других классов без пространств имён.
