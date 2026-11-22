@@ -160,7 +160,7 @@ body .mcx {
 |---|---|---|
 | `--mcx-gap` | the space between one field and the next | `12px` |
 | `--mcx-label-gap` | the space between a label and its own field | `2px` |
-| `--mcx-accent` | a field in focus, the ticked checkbox | `#2f6fbf` |
+| `--mcx-accent` | the ticked consent checkbox; with Own Styles set to *Full*, also a field in focus and every ticked checkbox and radio | `#2f6fbf` |
 | `--mcx-radius` | the corner radius of the message and notice blocks | `4px` |
 | `--mcx-field-border` | the border of the fields | `#dddddd` |
 | `--mcx-field-radius` | the corner radius of the fields | `4px` |
